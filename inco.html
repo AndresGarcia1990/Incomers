@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¿Quién quiere ser millonario? - Incoterms</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-image: url('https://th.bing.com/th/id/OIP.DEWCr0LfSJsX5c6W0XVtcQHaE8?rs=1&pid=ImgDetMain'); /* URL de la imagen de fondo */
+            background-size: cover;
+            color: white;
+        }
+        #game-container {
+            width: 80%;
+            max-width: 600px;
+            background-color: rgba(0, 0, 102, 0.8);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(255,255,255,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #ffd700;
+        }
+        #question {
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        #options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        button {
+            padding: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #000099;
+            color: white;
+            border: 2px solid #ffd700;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0000cc;
+        }
+        #result, #friend-advice {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+        #score, #level, #lifelines {
+            margin-top: 10px;
+            text-align: center;
+        }
+        #lifelines button {
+            margin: 5px;
+        }
+        #username {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <h1>¿Quién quiere ser millonario? - Incoterms</h1>
+        <div id="username"></div>
+        <div id="question"></div>
+        <div id="options"></div>
+        <div id="result"></div>
+        <div id="friend-advice"></div>
+        <div id="score">Premio: $<span id="score-value">0</span></div>
+        <div id="level">Nivel: <span id="level-value">1</span></div>
+        <div id="lifelines">
+            <button id="fifty-fifty">50:50</button>
+            <button id="ask-friend">Preguntar a un amigo</button>
+        </div>
+    </div>
+    <script>
+        let username = prompt("Por favor, ingresa tu nombre:");
+        document.getElementById("username").textContent = `Jugador: ${username}`;
+
+        const questions = [
+            { question: "¿Qué significa el Incoterm EXW?", options: ["Ex Works", "Export Warehouse", "Excluding Warranty", "Excluding Works"], correct: 0, value: 100 },
+            { question: "¿Cuál es la responsabilidad del vendedor en el Incoterm FOB?", options: ["Entregar la mercancía en el puerto de destino", "Entregar la mercancía a bordo del buque", "Pagar el seguro de la mercancía", "Pagar los aranceles de importación"], correct: 1, value: 100 },
+            { question: "¿Qué significa el Incoterm CIF?", options: ["Cost, Insurance and Freight", "Cost, Insurance and Fees", "Cost, Insurance and Fuel", "Cost, Insurance and Forwarding"], correct: 0, value: 100 },
+            { question: "¿Cuál es la diferencia principal entre los Incoterms DAP y DDP?", options: ["DDP incluye el pago de aranceles e impuestos", "DAP incluye el pago de aranceles e impuestos", "DDP excluye el seguro", "DAP excluye el transporte"], correct: 0, value: 100 },
+            { question: "¿Qué significa el Incoterm FCA?", options: ["Free Carrier", "Free Cargo", "Freight Carrier", "Freight Cargo"], correct: 0, value: 100 },
+            { question: "¿En qué Incoterm el vendedor asume todos los costos y riesgos hasta el destino final?", options: ["DDP", "DAP", "CIF", "FOB"], correct: 0, value: 100 },
+            { question: "¿Qué significa el Incoterm CPT?", options: ["Carriage Paid To", "Cargo Paid To", "Cost Paid To", "Carrier Paid To"], correct: 0, value: 100 },
+            { question: "¿Cuál es la responsabilidad del comprador en el Incoterm EXW?", options: ["Asumir todos los costos y riesgos desde el punto de entrega", "Asumir los costos de transporte hasta el puerto de origen", "Asumir los costos de seguro", "Asumir los costos de aranceles de exportación"], correct: 0, value: 100 },
+            { question: "¿Qué significa el Incoterm CIP?", options: ["Carriage and Insurance Paid To", "Cargo and Insurance Paid To", "Cost and Insurance Paid To", "Carrier and Insurance Paid To"], correct: 0, value: 100 },
+            { question: "¿En qué Incoterm el vendedor solo es responsable hasta que la mercancía esté a bordo del buque?", options: ["FOB", "CIF", "DAP", "DDP"], correct: 0, value: 100 }
+        ];
+        let currentQuestion = 0;
+        let score = 0;
+        let fiftyFiftyUsed = false;
+        let askFriendUsed = false;
+        function loadQuestion() {
+            const questionEl = document.getElementById("question");
+            const optionsEl = document.getElementById("options");
+            const resultEl = document.getElementById("result");
+            const friendAdviceEl = document.getElementById("friend-advice");
+            questionEl.textContent = questions[currentQuestion].question;
+            optionsEl.innerHTML = "";
+            resultEl.textContent = "";
+            friendAdviceEl.textContent = "";
+            questions[currentQuestion].options.forEach((option, index) => {
+                const button = document.createElement("button");
+                button.textContent = option;
+                button.onclick = () => checkAnswer(index);
+                optionsEl.appendChild(button);
+            });
+            updateLifelinesVisibility();
+        }
+        function checkAnswer(userAnswer) {
+            const resultEl = document.getElementById("result");
+            const scoreEl = document.getElementById("score-value");
+            if (userAnswer === questions[currentQuestion].correct) {
+                resultEl.textContent = "¡Correcto!";
+                score += questions[currentQuestion].value;
+                scoreEl.textContent = score;
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    setTimeout(loadQuestion, 2000);
+                } else {
+                    alert(`¡Felicidades, ${username}! Has ganado $${score}.`);
+                    resetGame();
+                }
+            } else {
+                resultEl.textContent = "Incorrecto. Juego terminado.";
+                alert(`Juego terminado. Premio final: $${score}`);
+                resetGame();
+            }
+        }
+        function fiftyFifty() {
+            if (fiftyFiftyUsed) return;
+            fiftyFiftyUsed = true;
+            const optionsEl = document.getElementById("options").children;
+            let removed = 0;
+            for (let i = 0; i < optionsEl.length; i++) {
+                if (i !== questions[currentQuestion].correct && removed < 2) {
+                    optionsEl[i].style.display = "none";
+                    removed++;
+                }
+            }
+            updateLifelinesVisibility();
+        }
+        function askFriend() {
+            if (askFriendUsed) return;
+            askFriendUsed = true;
+            document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
+            updateLifelinesVisibility();
+        }
+        function updateLifelinesVisibility() {
+            document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
+            document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
+        }
+        function resetGame() { currentQuestion = 0; score = 0; fiftyFiftyUsed = false; askFriendUsed = false; loadQuestion(); }
+        document.getElementById("fifty-fifty").onclick = fiftyFifty;
+        document.getElementById("ask-friend").onclick = askFriend;
+        loadQuestion();
+    </script>
+</body>
+</html>
