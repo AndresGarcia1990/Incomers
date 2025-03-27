@@ -120,16 +120,16 @@
         document.getElementById("username").textContent = `Jugador: ${username}`;
 
         const questions = [
-            { question: "¿Qué significa el Incoterm EXW?", options: ["Ex Works", "Export Warehouse", "Excluding Warranty", "Excluding Works"], correct: 0, value: 100 },
-            { question: "¿Cuál es la responsabilidad del vendedor en el Incoterm FOB?", options: ["Entregar la mercancía en el puerto de destino", "Entregar la mercancía a bordo del buque", "Pagar el seguro de la mercancía", "Pagar los aranceles de importación"], correct: 1, value: 100 },
-            { question: "¿Qué significa el Incoterm CIF?", options: ["Cost, Insurance and Freight", "Cost, Insurance and Fees", "Cost, Insurance and Fuel", "Cost, Insurance and Forwarding"], correct: 0, value: 100 },
-            { question: "¿Cuál es la diferencia principal entre los Incoterms DAP y DDP?", options: ["DDP incluye el pago de aranceles e impuestos", "DAP incluye el pago de aranceles e impuestos", "DDP excluye el seguro", "DAP excluye el transporte"], correct: 0, value: 100 },
-            { question: "¿Qué significa el Incoterm FCA?", options: ["Free Carrier", "Free Cargo", "Freight Carrier", "Freight Cargo"], correct: 0, value: 100 },
-            { question: "¿En qué Incoterm el vendedor asume todos los costos y riesgos hasta el destino final?", options: ["DDP", "DAP", "CIF", "FOB"], correct: 0, value: 100 },
-            { question: "¿Qué significa el Incoterm CPT?", options: ["Carriage Paid To", "Cargo Paid To", "Cost Paid To", "Carrier Paid To"], correct: 0, value: 100 },
-            { question: "¿Cuál es la responsabilidad del comprador en el Incoterm EXW?", options: ["Asumir todos los costos y riesgos desde el punto de entrega", "Asumir los costos de transporte hasta el puerto de origen", "Asumir los costos de seguro", "Asumir los costos de aranceles de exportación"], correct: 0, value: 100 },
-            { question: "¿Qué significa el Incoterm CIP?", options: ["Carriage and Insurance Paid To", "Cargo and Insurance Paid To", "Cost and Insurance Paid To", "Carrier and Insurance Paid To"], correct: 0, value: 100 },
-            { question: "¿En qué Incoterm el vendedor solo es responsable hasta que la mercancía esté a bordo del buque?", options: ["FOB", "CIF", "DAP", "DDP"], correct: 0, value: 100 }
+            { question: "1. ¿Qué significa el Incoterm EXW?", options: [ "Export Warehouse", "Excluding Warranty", "Ex Works", "Excluding Works"], correct: 2, value: 100 },
+            { question: "2. ¿Cuál es la responsabilidad del vendedor en el Incoterm FOB?", options: ["Entregar la mercancía en el puerto de destino", "Entregar la mercancía a bordo del buque", "Pagar el seguro de la mercancía", "Pagar los aranceles de importación"], correct: 1, value: 100 },
+            { question: "3. ¿Qué significa el Incoterm CIF?", options: ["Cost, Insurance and Fees", "Cost, Insurance and Fuel", "Cost, Insurance and Forwarding", "Cost, Insurance and Freight"], correct: 3, value: 100 },
+            { question: "4. ¿Cuál es la diferencia principal entre los Incoterms DAP y DDP?", options: ["DDP incluye el pago de aranceles e impuestos", "DAP incluye el pago de aranceles e impuestos", "DDP excluye el seguro", "DAP excluye el transporte"], correct: 0, value: 100 },
+            { question: "5. ¿Qué significa el Incoterm FCA?", options: ["Free Cargo", "Freight Carrier","Free Carrier", "Freight Cargo"], correct: 2, value: 100 },
+            { question: "6. ¿En qué Incoterm el vendedor asume todos los costos y riesgos hasta el destino final?", options: ["DDP", "DAP", "CIF", "FOB"], correct: 0, value: 100 },
+            { question: "7. ¿Qué significa el Incoterm CPT?", options: ["Cargo Paid To", "Cost Paid To", "Carrier Paid To","Carriage Paid To"], correct: 3, value: 100 },
+            { question: "8. ¿Cuál es la responsabilidad del comprador en el Incoterm EXW?", options: ["Asumir todos los costos y riesgos desde el punto de entrega", "Asumir los costos de transporte hasta el puerto de origen", "Asumir los costos de seguro", "Asumir los costos de aranceles de exportación"], correct: 0, value: 100 },
+            { question: "9. ¿Qué significa el Incoterm CIP?", options: ["Cargo and Insurance Paid To","Carriage and Insurance Paid To", "Cost and Insurance Paid To", "Carrier and Insurance Paid To"], correct: 1, value: 100 },
+            { question: "10 ¿En qué Incoterm el vendedor solo es responsable hasta que la mercancía esté a bordo del buque?", options: ["FOB", "CIF", "DAP", "DDP"], correct: 0, value: 100 }
         ];
 
         let currentQuestion = 0;
