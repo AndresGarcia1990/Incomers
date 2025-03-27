@@ -68,11 +68,20 @@
             margin-bottom: 20px;
             color: #ffd700;
         }
+        #scoreForm {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+        #scoresList {
+            margin-top: 20px;
+            text-align: left;
+        }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <h1>¿Quién quiere ser millonario? - Incoterms 10</h1>
+        <h1>¿Quién quiere ser millonario? - Incoterms</h1>
         <div id="username"></div>
         <div id="question"></div>
         <div id="options"></div>
@@ -84,15 +93,15 @@
             <button id="fifty-fifty">50:50</button>
             <button id="ask-friend">Preguntar a un amigo</button>
         </div>
+        <h2>Lista de Puntuaciones</h2>
+        <ul id="scoresList"></ul>
     </div>
-    <script>
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "firebase/app";
-        import { getAnalytics } from "firebase/analytics";
-        // TODO: Add SDKs for Firebase products that you want to use
-        // https://firebase.google.com/docs/web/setup#available-libraries
-
-        // Your web app's Firebase configuration
+    <script type="module">
+        // Importar las funciones necesarias desde los SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-analytics.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+        // Configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
             authDomain: "incomers-bee7d.firebaseapp.com",
@@ -102,13 +111,14 @@
             appId: "1:821388332213:web:0170ab2584f136fa5682fc",
             measurementId: "G-88PT3PBF1N"
         };
-
-        // Initialize Firebase
+        // Inicializar Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
+        const db = getFirestore(app);
 
         let username = prompt("Por favor, ingresa tu nombre:");
         document.getElementById("username").textContent = `Jugador: ${username}`;
+
         const questions = [
             { question: "¿Qué significa el Incoterm EXW?", options: ["Ex Works", "Export Warehouse", "Excluding Warranty", "Excluding Works"], correct: 0, value: 100 },
             { question: "¿Cuál es la responsabilidad del vendedor en el Incoterm FOB?", options: ["Entregar la mercancía en el puerto de destino", "Entregar la mercancía a bordo del buque", "Pagar el seguro de la mercancía", "Pagar los aranceles de importación"], correct: 1, value: 100 },
@@ -121,11 +131,18 @@
             { question: "¿Qué significa el Incoterm CIP?", options: ["Carriage and Insurance Paid To", "Cargo and Insurance Paid To", "Cost and Insurance Paid To", "Carrier and Insurance Paid To"], correct: 0, value: 100 },
             { question: "¿En qué Incoterm el vendedor solo es responsable hasta que la mercancía esté a bordo del buque?", options: ["FOB", "CIF", "DAP", "DDP"], correct: 0, value: 100 }
         ];
+
         let currentQuestion = 0;
         let score = 0;
         let fiftyFiftyUsed = false;
         let askFriendUsed = false;
+        let startTime;
+        let endTime;
+
         function loadQuestion() {
+            if (currentQuestion === 0) {
+                startTime = new Date(); // Iniciar el temporizador
+            }
             const questionEl = document.getElementById("question");
             const optionsEl = document.getElementById("options");
             const resultEl = document.getElementById("result");
@@ -142,67 +159,142 @@
             });
             updateLifelinesVisibility();
         }
+
         function checkAnswer(userAnswer) {
-            const resultEl = document.getElementById("result");
-            const scoreEl = document.getElementById("score-value");
-            if (userAnswer === questions[currentQuestion].correct) {
-                resultEl.textContent = "¡Correcto!";
-                score += questions[currentQuestion].value;
-                scoreEl.textContent = score;
-                currentQuestion++;
-                if (currentQuestion < questions.length) {
-                    setTimeout(loadQuestion, 2000);
-                } else {
-                    alert(`¡Felicidades, ${username}! Has ganado $${score}.`);
-                    resetGame();
-                }
-            } else {
-                resultEl.textContent = "Incorrecto. Juego terminado.";
-                alert(`Juego terminado. Premio final: $${score}`);
-                resetGame();
-            }
+    const resultEl = document.getElementById("result");
+    const scoreEl = document.getElementById("score-value");
+    if (userAnswer === questions[currentQuestion].correct) {
+        resultEl.textContent = "¡Correcto!";
+        score += questions[currentQuestion].value;
+        scoreEl.textContent = score;
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            setTimeout(loadQuestion, 2000);
+        } else {
+            endTime = new Date(); // Terminar el temporizador
+            const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
+            
+    saveScore(username, score, timeTaken);
+    alert(`¡Felicidades, ${username}! Has ganado $${score}. Tiempo tomado: ${timeTaken} segundos.`);
+    
+            showScoreForm(timeTaken);
         }
+    } else {
+        endTime = new Date(); // Terminar el temporizador
+        const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
+        resultEl.textContent = "Incorrecto. Juego terminado.";
+        
+    saveScore(username, score, timeTaken);
+    alert(`Juego terminado. Premio final: $${score}. Tiempo tomado: ${timeTaken} segundos.`);
+    
+        showScoreForm(timeTaken);
+    }
+}
 
-        function fiftyFifty() {
-            if (fiftyFiftyUsed) return;
-            fiftyFiftyUsed = true;
-            const optionsEl = document.getElementById("options").children;
-            let removed = 0;
-            for (let i = 0; i < optionsEl.length; i++) {
-                if (i !== questions[currentQuestion].correct && removed < 2) {
-                    optionsEl[i].style.display = "none";
-                    removed++;
-                }
-            }
-            updateLifelinesVisibility();
+function fiftyFifty() {
+    if (fiftyFiftyUsed) return;
+    fiftyFiftyUsed = true;
+    const optionsEl = document.getElementById("options").children;
+    let removed = 0;
+    for (let i = 0; i < optionsEl.length; i++) {
+        if (i !== questions[currentQuestion].correct && removed < 2) {
+            optionsEl[i].style.display = "none";
+            removed++;
         }
+    }
+    updateLifelinesVisibility();
+}
 
-        function askFriend() {
-            if (askFriendUsed) return;
-            askFriendUsed = true;
-            document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
-            updateLifelinesVisibility();
+function askFriend() {
+    if (askFriendUsed) return;
+    askFriendUsed = true;
+    document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
+    updateLifelinesVisibility();
+}
+
+function updateLifelinesVisibility() {
+    document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
+    document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
+}
+
+function showScoreForm(timeTaken) {
+    document.getElementById("scoreForm").style.display = "block";
+    document.getElementById("timeTaken").value = timeTaken; // Guardar tiempo tomado
+}
+
+document.getElementById("fifty-fifty").onclick = fiftyFifty;
+document.getElementById("ask-friend").onclick = askFriend;
+loadQuestion();
+
+// Manejar el envío del formulario
+
+    async function saveScore(name, score, timeTaken) {
+        const today = new Date();
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0!
+        const dd = String(today.getDate()).padStart(2, '0');
+        const formattedToday = `${yyyy}-${mm}-${dd}`;
+        try {
+            // Agregar un nuevo documento en la colección "scores"
+            const docRef = await addDoc(collection(db, "scores"), {
+                nombre: name,
+                puntuacion: score,
+                fecha: formattedToday,
+                tiempo: timeTaken
+            });
+            alert("¡Información guardada exitosamente!");
+            loadScores(); // Recargar los documentos mostrados
+        } catch (e) {
+            console.error("Error al agregar el documento: ", e);
+            alert("Hubo un error al guardar la información.");
         }
+    }
 
-        function updateLifelinesVisibility() {
-            document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
-            document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
+    document.getElementById("scoreForm").addEventListener("submit", async function(event) {
+    
+    event.preventDefault(); // Prevenir el envío normal del formulario
+    // Obtener los valores del formulario
+    const name = document.getElementById("name").value;
+    const date = document.getElementById("date").value;
+    const timeTaken = document.getElementById("timeTaken").value;
+    // Verificar si todos los campos están completos
+    if (name && score && date && timeTaken) {
+        try {
+            // Agregar un nuevo documento en la colección "scores"
+            const docRef = await addDoc(collection(db, "scores"), {
+                nombre: name,
+                puntuacion: score,
+                fecha: date,
+                tiempo: timeTaken
+            });
+            alert("¡Información guardada exitosamente!");
+            document.getElementById("scoreForm").reset(); // Limpiar el formulario después del éxito
+            loadScores(); // Recargar los documentos mostrados
+        } catch (e) {
+            console.error("Error al agregar el documento: ", e);
+            alert("Hubo un error al guardar la información.");
         }
+    } else {
+        alert("Por favor, complete todos los campos.");
+    }
+});
 
-        function resetGame() {
-            currentQuestion = 0;
-            score = 0;
-            fiftyFiftyUsed = false;
-            askFriendUsed = false;
-            loadQuestion();
-        }
+// Función para cargar y mostrar los documentos
+async function loadScores() {
+    const querySnapshot = await getDocs(collection(db, "scores"));
+    const scoresList = document.getElementById("scoresList");
+    scoresList.innerHTML = ""; // Limpiar la lista antes de agregar nuevos elementos
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const li = document.createElement("li");
+        li.textContent = `Nombre: ${data.nombre}, Puntuación: ${data.puntuacion}, Fecha: ${data.fecha}, Tiempo: ${data.tiempo} segundos`;
+        scoresList.appendChild(li);
+    });
+}
 
-        document.getElementById("fifty-fifty").onclick = fiftyFifty;
-        document.getElementById("ask-friend").onclick = askFriend;
-        loadQuestion();
-    </script>
+// Cargar los documentos cuando la página se carga
+window.onload = loadScores;
+
+ </script>
 </body>
 </html>
-
-
-            
