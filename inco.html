@@ -74,7 +74,7 @@
 </head>
 <body>
   <div id="game-container">
-    <h1>¿Quién quiere ser millonario? - Incoterms 5</h1>
+    <h1>¿Quién quiere ser millonario? - Incoterms 6</h1>
     <div id="username"></div>
     <div id="question"></div>
     <div id="options"></div>
@@ -91,12 +91,11 @@
     // Configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
-    authDomain: "incomers-bee7d.firebaseapp.com",
-    projectId: "incomers-bee7d",
-    storageBucket: "incomers-bee7d.firebasestorage.app",
-    messagingSenderId: "821388332213",
-    appId: "1:821388332213:web:0170ab2584f136fa5682fc",
-    measurementId: "G-88PT3PBF1N"
+      authDomain: "incomers-bee7d.firebaseapp.com",
+      projectId: "incomers-bee7d",
+      storageBucket: "incomers-bee7d.appspot.com",
+      messagingSenderId: "821388332213",
+      appId: "1:821388332213:web:0170ab2584f136fa5682fc"
     };
     // Inicializar Firebase
     const app = firebase.initializeApp(firebaseConfig);
@@ -176,7 +175,7 @@
       }
     }
 
-      function fiftyFifty() {
+    function fiftyFifty() {
       if (fiftyFiftyUsed) return;
       fiftyFiftyUsed = true;
       const optionsEl = document.getElementById("options").children;
