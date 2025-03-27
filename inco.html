@@ -72,7 +72,7 @@
 </head>
 <body>
     <div id="game-container">
-        <h1>¿Quién quiere ser millonario? - Incoterms Modo Dios </h1>
+        <h1>¿Quién quiere ser millonario? - Incoterms 10</h1>
         <div id="username"></div>
         <div id="question"></div>
         <div id="options"></div>
@@ -93,8 +93,7 @@
         // https://firebase.google.com/docs/web/setup#available-libraries
 
         // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-       Config = {
+        const firebaseConfig = {
             apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
             authDomain: "incomers-bee7d.firebaseapp.com",
             projectId: "incomers-bee7d",
@@ -163,7 +162,7 @@
                 resetGame();
             }
         }
-        
+
         function fiftyFifty() {
             if (fiftyFiftyUsed) return;
             fiftyFiftyUsed = true;
@@ -177,16 +176,19 @@
             }
             updateLifelinesVisibility();
         }
+
         function askFriend() {
             if (askFriendUsed) return;
             askFriendUsed = true;
             document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
             updateLifelinesVisibility();
         }
+
         function updateLifelinesVisibility() {
             document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
             document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
         }
+
         function resetGame() {
             currentQuestion = 0;
             score = 0;
@@ -194,9 +196,13 @@
             askFriendUsed = false;
             loadQuestion();
         }
+
         document.getElementById("fifty-fifty").onclick = fiftyFifty;
         document.getElementById("ask-friend").onclick = askFriend;
         loadQuestion();
     </script>
 </body>
 </html>
+
+
+            
