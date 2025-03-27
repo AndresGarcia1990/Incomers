@@ -182,4 +182,38 @@
       fiftyFiftyUsed = true;
       const optionsEl = document.getElementById("options").children;
       let removed = 0;
-      for (let i = 
+      for (let i = 0; i < optionsEl.length; i++) {
+        if (i !== questions[currentQuestion].correct && removed < 2) {
+          optionsEl[i].style.display = "none";
+          removed++;
+        }
+      }
+      updateLifelinesVisibility();
+    }
+
+    function askFriend() {
+      if (askFriendUsed) return;
+      askFriendUsed = true;
+      document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
+      updateLifelinesVisibility();
+    }
+
+    function updateLifelinesVisibility() {
+      document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
+      document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
+    }
+
+    function resetGame() {
+      currentQuestion = 0;
+      score = 0;
+      fiftyFiftyUsed = false;
+      askFriendUsed = false;
+      loadQuestion();
+    }
+
+    document.getElementById("fifty-fifty").onclick = fiftyFifty;
+    document.getElementById("ask-friend").onclick = askFriend;
+    loadQuestion();
+  </script>
+</body>
+</html>
