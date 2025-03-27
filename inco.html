@@ -93,8 +93,28 @@
             <button id="fifty-fifty">50:50</button>
             <button id="ask-friend">Preguntar a un amigo</button>
         </div>
+        <form id="scoreForm">
+            <label for="name">Nombre:</label>
+            <input type="text" id="name" required><br><br>
+            <label for="date">Fecha:</label>
+            <input type="date" id="date" required><br><br>
+            <input type="hidden" id="timeTaken"><br><br>
+            <button type="submit">Guardar Puntuación</button>
+        </form>
         <h2>Lista de Puntuaciones</h2>
-        <ul id="scoresList"></ul>
+        
+    <table id="scoresTable">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Puntuación</th>
+                <th>Fecha</th>
+                <th>Tiempo (segundos)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+    
     </div>
     <script type="module">
         // Importar las funciones necesarias desde los SDKs
@@ -280,7 +300,24 @@ loadQuestion();
 });
 
 // Función para cargar y mostrar los documentos
-async function loadScores() {
+
+    async function loadScores() {
+        const querySnapshot = await getDocs(collection(db, "scores"));
+        const scoresTableBody = document.querySelector("#scoresTable tbody");
+        scoresTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar nuevos elementos
+        querySnapshot.forEach((doc) => {
+            const data = doc.data();
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${data.nombre}</td>
+                <td>${data.puntuacion}</td>
+                <td>${data.fecha}</td>
+                <td>${data.tiempo}</td>
+            `;
+            scoresTableBody.appendChild(row);
+        });
+    }
+    
     const querySnapshot = await getDocs(collection(db, "scores"));
     const scoresList = document.getElementById("scoresList");
     scoresList.innerHTML = ""; // Limpiar la lista antes de agregar nuevos elementos
