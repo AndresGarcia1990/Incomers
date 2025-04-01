@@ -76,6 +76,10 @@
         #scoresList {
             margin-top: 20px;
             text-align: left;
+            max-height: 200px; /* Establecer una altura máxima */
+            overflow-y: auto; /* Agregar scroll vertical cuando sea necesario */
+            padding: 10px;
+            border: 1px solid #ccc;
         }
     </style>
 </head>
@@ -161,140 +165,140 @@
         }
 
         function checkAnswer(userAnswer) {
-    const resultEl = document.getElementById("result");
-    const scoreEl = document.getElementById("score-value");
-    if (userAnswer === questions[currentQuestion].correct) {
-        resultEl.textContent = "¡Correcto!";
-        score += questions[currentQuestion].value;
-        scoreEl.textContent = score;
-        currentQuestion++;
-        if (currentQuestion < questions.length) {
-            setTimeout(loadQuestion, 2000);
-        } else {
-            endTime = new Date(); // Terminar el temporizador
-            const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
-            
-    saveScore(username, score, timeTaken);
-    alert(`¡Felicidades, ${username}! Has ganado $${score}. Tiempo tomado: ${timeTaken} segundos.`);
-    
-            showScoreForm(timeTaken);
+            const resultEl = document.getElementById("result");
+            const scoreEl = document.getElementById("score-value");
+            if (userAnswer === questions[currentQuestion].correct) {
+                resultEl.textContent = "¡Correcto!";
+                score += questions[currentQuestion].value;
+                scoreEl.textContent = score;
+                currentQuestion++;
+                if (currentQuestion < questions.length) {
+                    setTimeout(loadQuestion, 2000);
+                } else {
+                    endTime = new Date(); // Terminar el temporizador
+                    const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
+
+                    saveScore(username, score, timeTaken);
+                    alert(`¡Felicidades, ${username}! Has ganado $${score}. Tiempo tomado: ${timeTaken} segundos.`);
+
+                    showScoreForm(timeTaken);
+                }
+            } else {
+                endTime = new Date(); // Terminar el temporizador
+                const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
+                resultEl.textContent = "Incorrecto. Juego terminado.";
+
+                saveScore(username, score, timeTaken);
+                alert(`Juego terminado. Premio final: $${score}. Tiempo tomado: ${timeTaken} segundos.`);
+
+                showScoreForm(timeTaken);
+            }
         }
-    } else {
-        endTime = new Date(); // Terminar el temporizador
-        const timeTaken = (endTime - startTime) / 1000; // Calcular tiempo en segundos
-        resultEl.textContent = "Incorrecto. Juego terminado.";
-        
-    saveScore(username, score, timeTaken);
-    alert(`Juego terminado. Premio final: $${score}. Tiempo tomado: ${timeTaken} segundos.`);
-    
-        showScoreForm(timeTaken);
-    }
-}
 
-function fiftyFifty() {
-    if (fiftyFiftyUsed) return;
-    fiftyFiftyUsed = true;
-    const optionsEl = document.getElementById("options").children;
-    let removed = 0;
-    for (let i = 0; i < optionsEl.length; i++) {
-        if (i !== questions[currentQuestion].correct && removed < 2) {
-            optionsEl[i].style.display = "none";
-            removed++;
+        function fiftyFifty() {
+            if (fiftyFiftyUsed) return;
+            fiftyFiftyUsed = true;
+            const optionsEl = document.getElementById("options").children;
+            let removed = 0;
+            for (let i = 0; i < optionsEl.length; i++) {
+                if (i !== questions[currentQuestion].correct && removed < 2) {
+                    optionsEl[i].style.display = "none";
+                    removed++;
+                }
+            }
+            updateLifelinesVisibility();
         }
-    }
-    updateLifelinesVisibility();
-}
 
-function askFriend() {
-    if (askFriendUsed) return;
-    askFriendUsed = true;
-    document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
-    updateLifelinesVisibility();
-}
+        function askFriend() {
+            if (askFriendUsed) return;
+            askFriendUsed = true;
+            document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
+            updateLifelinesVisibility();
+        }
 
-function updateLifelinesVisibility() {
-    document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
-    document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
-}
+        function updateLifelinesVisibility() {
+            document.getElementById("fifty-fifty").style.display = fiftyFiftyUsed ? "none" : "inline-block";
+            document.getElementById("ask-friend").style.display = askFriendUsed ? "none" : "inline-block";
+        }
 
-function showScoreForm(timeTaken) {
-    document.getElementById("scoreForm").style.display = "block";
-    document.getElementById("timeTaken").value = timeTaken; // Guardar tiempo tomado
-}
+        function showScoreForm(timeTaken) {
+            document.getElementById("scoreForm").style.display = "block";
+            document.getElementById("timeTaken").value = timeTaken; // Guardar tiempo tomado
+        }
 
-document.getElementById("fifty-fifty").onclick = fiftyFifty;
-document.getElementById("ask-friend").onclick = askFriend;
-loadQuestion();
+        document.getElementById("fifty-fifty").onclick = fiftyFifty;
+        document.getElementById("ask-friend").onclick = askFriend;
+        loadQuestion();
 
-// Manejar el envío del formulario
+        // Manejar el envío del formulario
 
-    async function saveScore(name, score, timeTaken) {
-        const today = new Date();
-        const yyyy = today.getFullYear();
-        const mm = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0!
-        const dd = String(today.getDate()).padStart(2, '0');
-        const formattedToday = `${yyyy}-${mm}-${dd}`;
-        try {
-            // Agregar un nuevo documento en la colección "scores"
-            const docRef = await addDoc(collection(db, "scores"), {
-                nombre: name,
-                puntuacion: score,
-                fecha: formattedToday,
-                tiempo: timeTaken
+        async function saveScore(name, score, timeTaken) {
+            const today = new Date();
+            const yyyy = today.getFullYear();
+            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0!
+            const dd = String(today.getDate()).padStart(2, '0');
+            const formattedToday = `${yyyy}-${mm}-${dd}`;
+            try {
+                // Agregar un nuevo documento en la colección "scores"
+                const docRef = await addDoc(collection(db, "scores"), {
+                    nombre: name,
+                    puntuacion: score,
+                    fecha: formattedToday,
+                    tiempo: timeTaken
+                });
+                alert("¡Información guardada exitosamente!");
+                loadScores(); // Recargar los documentos mostrados
+            } catch (e) {
+                console.error("Error al agregar el documento: ", e);
+                alert("Hubo un error al guardar la información.");
+            }
+        }
+
+        document.getElementById("scoreForm").addEventListener("submit", async function(event) {
+
+            event.preventDefault(); // Prevenir el envío normal del formulario
+            // Obtener los valores del formulario
+            const name = document.getElementById("name").value;
+            const date = document.getElementById("date").value;
+            const timeTaken = document.getElementById("timeTaken").value;
+            // Verificar si todos los campos están completos
+            if (name && score && date && timeTaken) {
+                try {
+                    // Agregar un nuevo documento en la colección "scores"
+                    const docRef = await addDoc(collection(db, "scores"), {
+                        nombre: name,
+                        puntuacion: score,
+                        fecha: date,
+                        tiempo: timeTaken
+                    });
+                    alert("¡Información guardada exitosamente!");
+                    document.getElementById("scoreForm").reset(); // Limpiar el formulario después del éxito
+                    loadScores(); // Recargar los documentos mostrados
+                } catch (e) {
+                    console.error("Error al agregar el documento: ", e);
+                    alert("Hubo un error al guardar la información.");
+                }
+            } else {
+                alert("Por favor, complete todos los campos.");
+            }
+        });
+
+        // Función para cargar y mostrar los documentos
+        async function loadScores() {
+            const querySnapshot = await getDocs(collection(db, "scores"));
+            const scoresList = document.getElementById("scoresList");
+            scoresList.innerHTML = ""; // Limpiar la lista antes de agregar nuevos elementos
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const li = document.createElement("li");
+                li.textContent = `Nombre: ${data.nombre}, Puntuación: ${data.puntuacion}, Fecha: ${data.fecha}, Tiempo: ${data.tiempo} segundos`;
+                scoresList.appendChild(li);
             });
-            alert("¡Información guardada exitosamente!");
-            loadScores(); // Recargar los documentos mostrados
-        } catch (e) {
-            console.error("Error al agregar el documento: ", e);
-            alert("Hubo un error al guardar la información.");
         }
-    }
 
-    document.getElementById("scoreForm").addEventListener("submit", async function(event) {
-    
-    event.preventDefault(); // Prevenir el envío normal del formulario
-    // Obtener los valores del formulario
-    const name = document.getElementById("name").value;
-    const date = document.getElementById("date").value;
-    const timeTaken = document.getElementById("timeTaken").value;
-    // Verificar si todos los campos están completos
-    if (name && score && date && timeTaken) {
-        try {
-            // Agregar un nuevo documento en la colección "scores"
-            const docRef = await addDoc(collection(db, "scores"), {
-                nombre: name,
-                puntuacion: score,
-                fecha: date,
-                tiempo: timeTaken
-            });
-            alert("¡Información guardada exitosamente!");
-            document.getElementById("scoreForm").reset(); // Limpiar el formulario después del éxito
-            loadScores(); // Recargar los documentos mostrados
-        } catch (e) {
-            console.error("Error al agregar el documento: ", e);
-            alert("Hubo un error al guardar la información.");
-        }
-    } else {
-        alert("Por favor, complete todos los campos.");
-    }
-});
+        // Cargar los documentos cuando la página se carga
+        window.onload = loadScores;
 
-// Función para cargar y mostrar los documentos
-async function loadScores() {
-    const querySnapshot = await getDocs(collection(db, "scores"));
-    const scoresList = document.getElementById("scoresList");
-    scoresList.innerHTML = ""; // Limpiar la lista antes de agregar nuevos elementos
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        const li = document.createElement("li");
-        li.textContent = `Nombre: ${data.nombre}, Puntuación: ${data.puntuacion}, Fecha: ${data.fecha}, Tiempo: ${data.tiempo} segundos`;
-        scoresList.appendChild(li);
-    });
-}
-
-// Cargar los documentos cuando la página se carga
-window.onload = loadScores;
-
- </script>
+    </script>
 </body>
 </html>
