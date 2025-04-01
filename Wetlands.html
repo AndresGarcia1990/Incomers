@@ -352,17 +352,24 @@
         // Manejar el envío del formulario
 
         async function saveScore(name, score, timeTaken) {
-            const today = new Date();
-            constтпункт = today.getFullYear();
-            const mm = String(today.getMonth() + 1).padStart(2, '0'); // Enero es 0!
-            const dd = String(today.getDate()).padStart(2, '0');
-            const formattedToday = `${yyyy}-${mm}-${dd}`;
+            const now = new Date();
+            const options = {
+                timeZone: 'America/Bogota',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            const colombianDate = now.toLocaleString('es-CO', options);
+
             try {
-                // Agregar un nuevo documento en la colección "scores"
-                const docRef = await addDoc(collection(db, "scores"), {
+                // Agregar un nuevo documento en la colección "Wetlands"
+                const docRef = await addDoc(collection(db, "Wetlands"), {
                     nombre: name,
                     puntuacion: score,
-                    fecha: formattedToday,
+                    fecha: colombianDate, // Guardar la fecha y hora de Colombia
                     tiempo: timeTaken
                 });
                 alert("¡Información guardada exitosamente!");
@@ -374,25 +381,22 @@
         }
 
         document.getElementById("scoreForm").addEventListener("submit", async function(event) {
-
-            event.preventDefault(); // Prevenir el envío normal del formulario
-            // Obtener los valores del formulario
+            event.preventDefault();
             const name = document.getElementById("name").value;
             const date = document.getElementById("date").value;
             const timeTaken = document.getElementById("timeTaken").value;
-            // Verificar si todos los campos están completos
             if (name && score && date && timeTaken) {
                 try {
-                    // Agregar un nuevo documento en la colección "scores"
-                    const docRef = await addDoc(collection(db, "scores"), {
+                    // Agregar un nuevo documento en la colección "Wetlands"
+                    const docRef = await addDoc(collection(db, "Wetlands"), {
                         nombre: name,
                         puntuacion: score,
                         fecha: date,
                         tiempo: timeTaken
                     });
                     alert("¡Información guardada exitosamente!");
-                    document.getElementById("scoreForm").reset(); // Limpiar el formulario después del éxito
-                    loadScores(); // Recargar los documentos mostrados
+                    document.getElementById("scoreForm").reset();
+                    loadScores();
                 } catch (e) {
                     console.error("Error al agregar el documento: ", e);
                     alert("Hubo un error al guardar la información.");
@@ -402,11 +406,10 @@
             }
         });
 
-        // Función para cargar y mostrar los documentos
         async function loadScores() {
-            const querySnapshot = await getDocs(collection(db, "scores"));
+            const querySnapshot = await getDocs(collection(db, "Wetlands"));
             const scoresList = document.getElementById("scoresList");
-            scoresList.innerHTML = ""; // Limpiar la lista antes de agregar nuevos elementos
+            scoresList.innerHTML = "";
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const li = document.createElement("li");
@@ -415,9 +418,7 @@
             });
         }
 
-        // Cargar los documentos cuando la página se carga
         window.onload = loadScores;
-
     </script>
 </body>
 </html>
