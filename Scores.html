@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Puntuaciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        #scores-container {
+            width: 80%;
+            max-width: 800px;
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        #scoresTableWrapper {
+            max-height: 600px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div id="scores-container">
+        <h1>Lista de Puntuaciones</h1>
+        <div id="scoresTableWrapper">
+            <table id="scoresTable">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Puntuación</th>
+                        <th>Fecha</th>
+                        <th>Tiempo (segundos)</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    <script type="module">
+        // Importar las funciones necesarias desde los SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        // Configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+            authDomain: "incomers-bee7d.firebaseapp.com",
+            projectId: "incomers-bee7d",
+            storageBucket: "incomers-bee7d.firebasestorage.app",
+            messagingSenderId: "821388332213",
+            appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+            measurementId: "G-88PT3PBF1N"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadScores() {
+            const querySnapshot = await getDocs(collection(db, "Wetlands")); // Cambiado a "Wetlands"
+            const scoresTableBody = document.querySelector("#scoresTable tbody");
+
+            let scores = [];
+
+            querySnapshot.forEach((doc) => {
+                scores.push(doc.data());
+            });
+
+            // Ordenar por puntuación y tiempo
+            scores.sort((a, b) => b.puntuacion - a.puntuacion || a.tiempo - b.tiempo);
+
+            scoresTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar nuevos elementos
+
+            scores.forEach((data) => {
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td>${data.nombre}</td>
+                    <td>${data.puntuacion}</td>
+                    <td>${data.fecha}</td>
+                    <td>${data.tiempo}</td>
+                `;
+                scoresTableBody.appendChild(row);
+            });
+        }
+
+        // Cargar los documentos cuando la página se carga
+        window.onload = loadScores;
+    </script>
+</body>
+</html>
