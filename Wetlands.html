@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>¿Quién quiere ser millonario? - Humedales</title>
+    <title>Who Wants to Be a Millionaire? - Wetlands</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -145,8 +145,8 @@
                 ]
             },
             {
-                question: "2. ¿Cuál de estos animales es común encontrar en humedales?",
-                options: ["León", "Caimán", "Oveja", "Elefante"],
+                question: "2. Which of these animals is common to find in wetlands?",
+                options: ["Lion", "Caiman", "Sheep", "Elephant"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -157,8 +157,8 @@
                 ]
             },
             {
-                question: "3. ¿Qué función importante cumplen los humedales para el agua?",
-                options: ["Contaminarla", "Filtrarla", "Evaporarla", "Congelarla"],
+                question: "3. What important function fulfill water wetlands?",
+                options: ["Contaminate it", "Filter it", "Evaporate it", "Freeze it"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -169,8 +169,8 @@
                 ]
             },
             {
-                question: "4. ¿Qué tipo de aves migratorias suelen visitar los humedales?",
-                options: ["Palomas", "Pingüinos", "Patos y garzas", "Canarios"],
+                question: "4. What kind of migratory birds usually visit wetlands?",
+                options: ["Doves", "Penguins", "Ducks and herons", "Canaries"],
                 correct: 2,
                 value: 100,
                 images: [
@@ -181,8 +181,8 @@
                 ]
             },
             {
-                question: "5. ¿Qué planta acuática es típica de los humedales?",
-                options: ["Cactus", "Lirio de agua", "Helecho", "Pino"],
+                question: "5. What aquatic plant is typical of wetlands?",
+                options: ["Cactus", "Water lily", "Fern", "Pine"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -193,8 +193,8 @@
                 ]
             },
             {
-                question: "6. ¿Qué rol juegan los humedales en la prevención de inundaciones?",
-                options: ["Aumentan las inundaciones", "Las previenen", "No tienen efecto", "Las atraen"],
+                question: "6. What role do wetlands play flood prevention?",
+                options: ["Floods increase", "Floods increase", "They have no effect", "They attract them"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -205,8 +205,8 @@
                 ]
             },
             {
-                question: "7. ¿Qué tipo de peces se encuentran comúnmente en humedales?",
-                options: ["Pez espada", "Trucha", "Carpa", "Tiburón"],
+                question: "7. What type of fish are commonly found in wetlands?",
+                options: ["Sword fish", "Trout", "carp (Fish)", "Shark"],
                 correct: 2,
                 value: 100,
                 images: [
@@ -217,8 +217,8 @@
                 ]
             },
             {
-                question: "8. ¿Qué mamífero semiacuático habita en los humedales?",
-                options: ["Jirafa", "Nutria", "Cebra", "Koala"],
+                question: "8. Which semi-aquatic mammal inhabits wetlands?",
+                options: ["Giraffe", "Otter", "Zebra", "Koala"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -229,8 +229,8 @@
                 ]
             },
             {
-                question: "9. ¿Qué insecto acuático es característico de los humedales?",
-                options: ["Mariposa", "Libélula", "Abeja", "Hormiga"],
+                question: "9. Which aquatic insect is characteristic of wetlands?",
+                options: ["Butterfly", "Dragonfly", "Bee", "Ant"],
                 correct: 1,
                 value: 100,
                 images: [
@@ -241,8 +241,8 @@
                 ]
             },
             {
-                question: "10. ¿Qué importancia tienen los humedales para la biodiversidad?",
-                options: ["Poca importancia", "Mucha importancia", "Solo para peces", "Solo para aves"],
+                question: "10. What is the importance of wetlands for biodiversity?",
+                options: ["Little importance", "Great importance", "Only for fish", "Only for birds"],
                 correct: 1,
                 value: 100
             }
@@ -325,7 +325,7 @@
         function askFriend() {
             if (askFriendUsed) return;
             askFriendUsed = true;
-            document.getElementById("friend-advice").textContent = `Tu amigo sugiere que la respuesta es: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
+            document.getElementById("friend-advice").textContent = `Your friend suggests that the answer is: ${questions[currentQuestion].options[questions[currentQuestion].correct]}.`;
             updateLifelinesVisibility();
         }
 
