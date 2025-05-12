@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pollinator Details</title>
+  <style>
+    body {
+      background-color: #bbdd8c;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+    }
+    header {
+      background-color: #8cbf3f;
+      color: white;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+    }
+    .icon {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+    form {
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      width: 80%;
+      max-width: 500px;
+      margin: 20px 0;
+    }
+    form div {
+      margin-bottom: 15px;
+    }
+    form label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    form input[type="text"],
+    form textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    form input[type="file"] {
+      border: none;
+    }
+    form button {
+      background-color: #8cbf3f;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    form button:hover {
+      background-color: #7aa934;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+      authDomain: "incomers-bee7d.firebaseapp.com",
+      projectId: "incomers-bee7d",
+      storageBucket: "incomers-bee7d.firebasestorage.app",
+      messagingSenderId: "821388332213",
+      appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+      measurementId: "G-88PT3PBF1N"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Obtener el ID del polinizador de la URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const pollinatorId = urlParams.get('id');
+
+    // Función para cargar los datos del polinizador
+    async function loadPollinatorData() {
+      if (pollinatorId) {
+        const docRef = doc(db, "pollinator", pollinatorId);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const pollinator = docSnap.data();
+          document.getElementById('name').value = pollinator.NamePollinator;
+          document.getElementById('description').value = pollinator.Description;
+          document.getElementById('habitat').value = pollinator.Habitat;
+          document.getElementById('importance').value = pollinator.Importance;
+          document.getElementById('image-preview').src = pollinator.ImageBase64;
+        } else {
+          console.log("No such document!");
+        }
+      } else {
+        console.log("No pollinator ID found in URL");
+      }
+    }
+
+    // Función para actualizar los datos del polinizador
+    async function updatePollinator(event) {
+      event.preventDefault(); // Prevenir el envío del formulario
+
+      const name = document.getElementById('name').value;
+      const description = document.getElementById('description').value;
+      const habitat = document.getElementById('habitat').value;
+      const importance = document.getElementById('importance').value;
+      const image = document.getElementById('image').files[0];
+
+      const docRef = doc(db, "pollinator", pollinatorId);
+
+      if (name && description && habitat && importance) {
+        const updateData = {
+          NamePollinator: name,
+          Description: description,
+          Habitat: habitat,
+          Importance: importance
+        };
+
+        if (image) {
+          const reader = new FileReader();
+          reader.onload = async function(event) {
+            const imageData = event.target.result;
+            updateData.ImageBase64 = imageData;
+            await updateDoc(docRef, updateData);
+            alert('Pollinator updated successfully!');
+            location.href = 'Pollinator.html';
+          };
+          reader.readAsDataURL(image);
+        } else {
+          await updateDoc(docRef, updateData);
+          alert('Pollinator updated successfully!');
+          location.href = 'Pollinator.html';
+        }
+      } else {
+        alert('Please fill out all fields.');
+      }
+    }
+
+    // Cargar los datos del polinizador al cargar la página
+    document.addEventListener('DOMContentLoaded', (event) => {
+      loadPollinatorData();
+      document.getElementById('pollinator-form').addEventListener('submit', updatePollinator);
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <img src="Imagenes/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
+    <h1>Pollinator Details</h1>
+  </header>
+  <form id="pollinator-form">
+    <div>
+      <label for="name">NamePollinator</label>
+      <input type="text" id="name" name="name" autocomplete="name" required>
+    </div>
+    <div>
+      <label for="description">Description</label>
+      <textarea id="description" name="description" autocomplete="description" required></textarea>
+    </div>
+    <div>
+      <label for="habitat">Habitat</label>
+      <input type="text" id="habitat" name="habitat" autocomplete="habitat" required>
+    </div>
+    <div>
+      <label for="importance">Importance</label>
+      <input type="text" id="importance" name="importance" autocomplete="importance" required>
+    </div>
+    <div>
+      <label for="image">Image</label>
+      <input type="file" id="image" name="image">
+      <img id="image-preview" src="" alt="Image Preview" style="display: block; margin-top: 10px; width: 100px; height: 100px;">
+    </div>
+    <button type="submit">Actualizar</button>
+  </form>
+  <footer>
+    <p>© 2025 Pollinator Conservation Project</p>
+  </footer>
+</body>
+</html>

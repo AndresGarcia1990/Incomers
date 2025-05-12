@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pollinator</title>
+  <style>
+    body {
+      background-color: #bbdd8c;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 0;
+    }
+    header {
+      background-color: #8cbf3f; /* Cambiado el color del encabezado */
+      color: white;
+      text-align: center;
+      padding: 10px;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h1 {
+      margin: 0;
+    }
+    .icon {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+    .pollinator-list {
+      width: 80%;
+      margin: 20px 0;
+    }
+    .pollinator-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: #fff;
+      padding: 10px;
+      margin: 10px 0;
+      border-radius: 5px;
+    }
+    .pollinator-item img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+    }
+    .pollinator-item .details {
+      flex-grow: 1;
+      margin-left: 10px;
+    }
+    .pollinator-item .details h3 {
+      margin: 0;
+    }
+    .pollinator-item .details p {
+      margin: 5px 0 0;
+    }
+    .pollinator-item .arrow {
+      cursor: pointer;
+      width: 30px;
+      height: 30px;
+    }
+    footer {
+      text-align: center;
+      padding: 10px;
+      background-color: #f1f1f1;
+      width: 100%;
+    }
+  </style>
+  <!-- Firebase SDKs -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.7.1/firebase-firestore.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+      authDomain: "incomers-bee7d.firebaseapp.com",
+      projectId: "incomers-bee7d",
+      storageBucket: "incomers-bee7d.firebasestorage.app",
+      messagingSenderId: "821388332213",
+      appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+      measurementId: "G-88PT3PBF1N"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Función para sincronizar la lista de polinizadores
+    async function syncPollinators() {
+      const pollinatorList = document.getElementById('pollinator-list');
+      pollinatorList.innerHTML = ''; // Limpiar la lista antes de sincronizar
+
+      const querySnapshot = await getDocs(collection(db, "pollinator"));
+      querySnapshot.forEach((doc) => {
+        const pollinator = doc.data();
+        const pollinatorItem = document.createElement('div');
+        pollinatorItem.className = 'pollinator-item';
+
+        const image = document.createElement('img');
+        image.src = pollinator.ImageBase64;
+        pollinatorItem.appendChild(image);
+
+        const details = document.createElement('div');
+        details.className = 'details';
+        const name = document.createElement('h3');
+        name.textContent = pollinator.NamePollinator;
+        details.appendChild(name);
+        const description = document.createElement('p');
+        description.textContent = `Description: ${pollinator.Description}`;
+        details.appendChild(description);
+        const habitat = document.createElement('p');
+        habitat.textContent = `Habitat: ${pollinator.Habitat}`;
+        details.appendChild(habitat);
+        const importance = document.createElement('p');
+        importance.textContent = `Importance: ${pollinator.Importance}`;
+        details.appendChild(importance);
+
+        pollinatorItem.appendChild(details);
+
+        const arrow = document.createElement('img');
+        arrow.src = "Imagenes/Adelante.png";
+        arrow.className = 'arrow';
+        arrow.onclick = () => {
+          location.href = `pollinatorDetails.html?id=${doc.id}`;
+        };
+        pollinatorItem.appendChild(arrow);
+
+        pollinatorList.appendChild(pollinatorItem);
+      });
+    }
+
+    // Sincronizar la lista de polinizadores al cargar la página
+    document.addEventListener('DOMContentLoaded', (event) => {
+      syncPollinators();
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <img src="Imagenes/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
+    <h1>Pollinator</h1>
+    <img src="Imagenes/Sincronizar.png" alt="Sincronizar" class="icon" onclick="syncPollinators()">
+    <img src="Imagenes/Agregar.png" alt="Agregar" class="icon" onclick="location.href='NewPollinator.html'">
+  </header>
+  <div class="pollinator-list" id="pollinator-list">
+    <!-- Lista de polinizadores se llenará aquí -->
+  </div>
+  <footer>
+    <p>© 2025 Pollinator Conservation Project</p>
+  </footer>
+</body>
+</html>
