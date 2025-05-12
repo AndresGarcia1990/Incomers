@@ -124,7 +124,7 @@
         pollinatorItem.appendChild(details);
 
         const arrow = document.createElement('img');
-        arrow.src = "Imagenes/Adelante.png";
+        arrow.src = "/Incomers/Adelante.png";
         arrow.className = 'arrow';
         arrow.onclick = () => {
           location.href = `pollinatorDetails.html?id=${doc.id}`;
@@ -143,10 +143,10 @@
 </head>
 <body>
   <header>
-    <img src="Imagenes/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
+    <img src="/Incomers/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
     <h1>Pollinator</h1>
-    <img src="Imagenes/Sincronizar.png" alt="Sincronizar" class="icon" onclick="syncPollinators()">
-    <img src="Imagenes/Agregar.png" alt="Agregar" class="icon" onclick="location.href='NewPollinator.html'">
+    <img src="/Incomers/Sincronizar.png" alt="Sincronizar" class="icon" onclick="syncPollinators()">
+    <img src="/Incomers/Agregar.png" alt="Agregar" class="icon" onclick="location.href='NewPollinator.html'">
   </header>
   <div class="pollinator-list" id="pollinator-list">
     <!-- Lista de polinizadores se llenará aquí -->
