@@ -124,7 +124,7 @@
         speciesItem.appendChild(details);
 
         const arrow = document.createElement('img');
-        arrow.src = "Imagenes/Adelante.png";
+        arrow.src = "/Incomers/Adelante.png";
         arrow.className = 'arrow';
         arrow.onclick = () => {
           location.href = `speciesDetails.html?id=${doc.id}`;
@@ -143,10 +143,10 @@
 </head>
 <body>
   <header>
-    <img src="Imagenes/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
+    <img src="/Incomers/Home.png" alt="Home" class="icon" onclick="location.href='Index.html'">
     <h1>Species</h1>
-    <img src="Imagenes/Sincronizar.png" alt="Sincronizar" class="icon" onclick="syncSpecies()">
-    <img src="Imagenes/Agregar.png" alt="Agregar" class="icon" onclick="location.href='NewSpecies.html'">
+    <img src="/Incomers/Sincronizar.png" alt="Sincronizar" class="icon" onclick="syncSpecies()">
+    <img src="/Incomers/Agregar.png" alt="Agregar" class="icon" onclick="location.href='NewSpecies.html'">
   </header>
   <div class="species-list" id="species-list">
     <!-- Lista de especies se llenará aquí -->
