@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Resultado Final</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #000428, #004e92);
+      color: #fff;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.5em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      max-width: 700px;
+      font-size: 1.3em;
+      margin-bottom: 2em;
+    }
+
+    .restart-button {
+      background-color: #fdcb6e;
+      color: #2d3436;
+      border: none;
+      padding: 1em 2em;
+      font-size: 1.1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .restart-button:hover {
+      background-color: #e17055;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h1>¡Misión Completada!</h1>
+  <p id="final"></p>
+
+  <button class="restart-button" onclick="location.href='resumen.html'">Volver a Empezar</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const estrategia = params.get('estrategia');
+    const final = document.getElementById('final');
+
+    switch (estrategia) {
+      case 'automatizar':
+        final.innerText = "Automatizaste la solicitud más frecuente. Esto liberó al equipo de soporte, mejoró los tiempos de respuesta y generó ahorros significativos para la empresa. ¡Una decisión brillante!";
+        break;
+      case 'capacitar':
+        final.innerText = "Capacitaste a los usuarios para gestionar sus solicitudes. Esto empoderó a los equipos, aunque tomó más tiempo ver resultados. ¡Una apuesta por la autonomía!";
+        break;
+      case 'delegar':
+        final.innerText = "Delegaste la solicitud a un equipo especializado. Esto alivió al service desk, pero aumentó la complejidad operativa. ¡Una solución equilibrada!";
+        break;
+      default:
+        final.innerText = "No se ha detectado una estrategia válida. Por favor, vuelve a intentarlo desde el inicio.";
+    }
+  </script>
+</body>
+</html>

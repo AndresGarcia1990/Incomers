@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Decisión 2 - Consecuencias</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+      color: #fff;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+     1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      max-width: 700px;
+      font-size: 1.2em;
+      margin-bottom: 2em;
+    }
+
+    .next-button {
+      background-color: #0984e3;
+      color: white;
+      border: none;
+      padding: 1em 2em;
+      font-size: 1.1em;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .next-button:hover {
+      background-color: #0652dd;
+    }
+  </style>
+</head>
+<body>
+  <h1>Tu decisión ha sido tomada...</h1>
+  <p id="resultado"></p>
+
+  <button class="next-button" onclick="location.href='decision3.html'">Continuar</button>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const opcion = params.get('opcion');
+    const resultado = document.getElementById('resultado');
+
+    switch (opcion) {
+      case 'cliente':
+        resultado.innerText = "Has decidido crear aplicaciones orientadas al cliente. Esto hizo que el proceso de solicitud fuera más intuitivo, mejorando la experiencia del usuario desde el inicio.";
+        break;
+      case 'equipos':
+        resultado.innerText = "Has decidido reorganizar los equipos internos primero. Esto ayudó a establecer una base sólida, pero retrasó un poco la implementación de mejoras visibles para los usuarios.";
+        break;
+      case 'automatizacion':
+        resultado.innerText = "Has decidido automatizar las solicitudes frecuentes desde el inicio. Esto redujo la carga del equipo de soporte, pero algunos usuarios se sintieron confundidos por los cambios rápidos.";
+        break;
+      default:
+        resultado.innerText = "No se ha seleccionado una opción válida. Por favor, vuelve a la página anterior.";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Decisión 1 - Inicio de la Transformación</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #283048, #859398);
+      color: #fff;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      max-width: 700px;
+      font-size: 1.2em;
+      margin-bottom: 2em;
+    }
+
+    .option-button {
+      background-color: #00b894;
+      color: white;
+      border: none;
+      padding: 1em 2em;
+      font-size: 1.1em;
+      border-radius: 8px;
+     1em;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .option-button:hover {
+      background-color: #019875;
+    }
+  </style>
+</head>
+<body>
+  <h1>Decisión 1: ¿Cómo iniciar la transformación?</h1>
+  <p>
+    Farfetch está lista para renovar su sistema de gestión de servicios. Como líder del proyecto, debes decidir cuál será el primer paso estratégico para lograr una transformación efectiva.
+  </p>
+
+  <button class="option-button" onclick="location.href='decision2.html?opcion=cliente'">
+    Crear aplicaciones orientadas al cliente para facilitar las solicitudes
+  </button>
+
+  <button class="option-button" onclick="location.href='decision2.html?opcion=equipos'">
+    Reorganizar los equipos internos antes de cambiar la herramienta
+  </button>
+
+  <button class="option-button" onclick="location.href='decision2.html?opcion=automatizacion'">
+    Automatizar las solicitudes más frecuentes desde el inicio
+  </button>
+</body>
+</html>

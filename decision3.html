@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Decisión 3 - Solicitudes Frecuentes</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #1e3c72, #2a5298);
+      color: #fff;
+      margin: 0;
+      padding: 2em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2em;
+      margin-bottom: 0.5em;
+    }
+
+    p {
+      max-width: 700px;
+      font-size: 1.2em;
+      margin-bottom: 2em;
+    }
+
+    .option-button {
+      background-color: #6c5ce7;
+      color: white;
+      border: none;
+     1em 2em;
+      font-size: 1.1em;
+      border-radius: 8px;
+      cursor: pointer;
+      margin: 1em 0;
+      transition: background-color 0.3s ease;
+      width: 80%;
+      max-width: 500px;
+    }
+
+    .option-button:hover {
+      background-color: #4834d4;
+    }
+  </style>
+</head>
+<body>
+  <h1>Decisión 3: ¿Cómo manejar las solicitudes más frecuentes?</h1>
+  <p>
+    Una solicitud específica representa más del 40% del trabajo del equipo de soporte. Esto está afectando la eficiencia general. ¿Qué estrategia eliges para resolver este problema?
+  </p>
+
+  <button class="option-button" onclick="location.href='resultado.html?estrategia=automatizar'">
+    Automatizar completamente la solicitud más frecuente
+  </button>
+
+  <button class="option-button" onclick="location.href='resultado.html?estrategia=capacitar'">
+    Capacitar a los usuarios para que la gestionen correctamente
+  </button>
+
+  <button class="option-button" onclick="location.href='resultado.html?estrategia=delegar'">
+    Delegar esta solicitud a un equipo especializado
+  </button>
+</body>
+</html>
