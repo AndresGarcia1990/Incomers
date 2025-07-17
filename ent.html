@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrenamiento Interactivo - Andres</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2c3e50; }
+        .exercise { margin-bottom: 20px; }
+        .timer, .counter { font-weight: bold; color: #e74c3c; }
+        select { font-size: 16px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Entrenamiento Interactivo - Andres</h1>
+    <label for="daySelect">Selecciona el día:</label>
+    <select id="daySelect" onchange="showExercises()">
+        <option value="">-- Selecciona --</option>
+<option value="Lunes">Lunes</option>
+<option value="Martes">Martes</option>
+<option value="Miércoles">Miércoles</option>
+<option value="Jueves">Jueves</option>
+<option value="Viernes">Viernes</option>
+
+    </select>
+    <div id="exerciseContainer"></div>
+
+    <script>
+        const exercises = {
+"Lunes": [
+{name: "Sentadillas (12-18 kg)", reps: 12},
+{name: "Peso muerto rumano (12-18 kg)", reps: 12},
+{name: "Zancadas (12-18 kg)", reps: 12},
+],
+"Martes": [
+{name: "Remo con mancuernas (10-14 kg)", reps: 12},
+{name: "Pull-over (10-14 kg)", reps: 12},
+{name: "Superman (peso corporal)", reps: 15},
+],
+"Miércoles": [
+{name: "Crunch con peso (4-6 kg)", reps: 15},
+{name: "Elevaciones de piernas (peso Corporal)", reps: 15},
+{name: "Plancha(peso corporal)", reps: 30},
+],
+"Jueves": [
+{name: "Curl de bíceps (6-10 kg)", reps: 12},
+{name: "Press militar(8-12 kg)", reps: 12},
+{name: "Extensión de tríceps(6-10 kg)", reps: 12},
+],
+"Viernes": [
+{name: "Sentadillas (12-18 kg)", reps: 12},
+{name: "Remo con mancuernas (10-14 kg)", reps: 12},
+{name: "Crunch con peso (4-6 kg)", reps: 15},
+{name: "Curl de bíceps(6-10 kg)", reps: 12},
+{name: "Press militar(8-12 kg)", reps: 12},
+{name: "Plancha(peso corporal)", reps: 30},
+],
+
+        };
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            speechSynthesis.speak(utterance);
+        }
+
+        function startVoiceCount(reps, id) {
+            let count = 1;
+            const interval = setInterval(() => {
+                if (count > reps) {
+                    clearInterval(interval);
+                } else {
+                    speak(count.toString());
+                    count++;
+                }
+            }, 1500);
+        }
+
+        function startRestTimer(id, counterId) {
+            let seconds = 60;
+            const timer = document.getElementById(id);
+            const counter = document.getElementById(counterId);
+            let count = parseInt(counter.innerText) || 0;
+            count++;
+            counter.innerText = count;
+
+            const interval = setInterval(() => {
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    timer.innerHTML = "¡Descanso terminado!";
+                } else {
+                    let min = Math.floor(seconds / 60);
+                    let sec = seconds % 60;
+                    timer.innerHTML = min + "m " + sec + "s";
+                    seconds--;
+                }
+            }, 1000);
+        }
+
+        function showExercises() {
+            const day = document.getElementById("daySelect").value;
+            const container = document.getElementById("exerciseContainer");
+            container.innerHTML = "";
+
+            if (exercises[day]) {
+                exercises[day].forEach((ex, index) => {
+                    const exId = `timer${index}`;
+                    const countId = `counter${index}`;
+                    container.innerHTML += `
+                        <div class="exercise">
+                            <h3>${ex.name} - 4 series x  ${ex.reps} repeticiones</h3>
+                            <button onclick="startVoiceCount(${ex.reps}, '${exId}')">Iniciar conteo en voz alta</button>
+                            <button onclick="startRestTimer('${exId}', '${countId}')">Iniciar descanso</button>
+                            <div class="timer" id="${exId}"></div>
+                            <div>Descansos realizados: <span class="counter" id="${countId}">0</span></div>
+                        </div>
+                    `;
+                });
+            }
+        }
+    </script>
+</body>
+</html>
