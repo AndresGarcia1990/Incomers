@@ -1,0 +1,68 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Cronograma de Entrenamiento - Andres</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #2c3e50; }
+        .exercise { margin-bottom: 20px; }
+        .timer { font-weight: bold; color: #e74c3c; margin-left: 10px; }
+        .counter { font-weight: bold; color: #2980b9; margin-left: 10px; }
+    </style>
+    <script>
+        const rutina = {"Lunes": [{"ejercicio": "Sentadillas", "peso": "12-18 kg", "series": 4, "reps": 12}, {"ejercicio": "Peso muerto rumano", "peso": "12-18 kg", "series": 4, "reps": 12}, {"ejercicio": "Zancadas", "peso": "12-18 kg", "series": 4, "reps": 12}], "Martes": [{"ejercicio": "Remo con mancuernas", "peso": "10-14 kg", "series": 4, "reps": 12}, {"ejercicio": "Pull-over", "peso": "10-14 kg", "series": 4, "reps": 12}, {"ejercicio": "Superman", "peso": "Peso corporal", "series": 4, "reps": 12}], "Mi\u00e9rcoles": [{"ejercicio": "Crunch con peso", "peso": "4-6 kg", "series": 4, "reps": 15}, {"ejercicio": "Elevaciones de piernas", "peso": "Peso corporal", "series": 4, "reps": 15}, {"ejercicio": "Plancha", "peso": "Peso corporal", "series": 4, "reps": 30}], "Jueves": [{"ejercicio": "Curl de b\u00edceps", "peso": "6-10 kg", "series": 4, "reps": 12}, {"ejercicio": "Press militar", "peso": "8-12 kg", "series": 4, "reps": 12}, {"ejercicio": "Extensi\u00f3n de tr\u00edceps", "peso": "6-10 kg", "series": 4, "reps": 12}], "Viernes": [{"ejercicio": "Sentadillas", "peso": "12-18 kg", "series": 4, "reps": 12}, {"ejercicio": "Remo con mancuernas", "peso": "10-14 kg", "series": 4, "reps": 12}, {"ejercicio": "Crunch con peso", "peso": "4-6 kg", "series": 4, "reps": 15}, {"ejercicio": "Curl de b\u00edceps", "peso": "6-10 kg", "series": 4, "reps": 12}, {"ejercicio": "Press militar", "peso": "8-12 kg", "series": 4, "reps": 12}, {"ejercicio": "Plancha", "peso": "Peso corporal", "series": 4, "reps": 30}]};
+
+        function startCountdown(id, counterId, seconds) {
+            var timer = document.getElementById(id);
+            var counter = document.getElementById(counterId);
+            var count = parseInt(counter.innerText);
+            counter.innerText = count + 1;
+
+            var interval = setInterval(function() {
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    timer.innerHTML = "¡Tiempo terminado!";
+                } else {
+                    var min = Math.floor(seconds / 60);
+                    var sec = seconds % 60;
+                    timer.innerHTML = min + "m " + sec + "s";
+                    seconds--;
+                }
+            }, 1000);
+        }
+
+        function mostrarDia() {
+            var dia = document.getElementById("diaSelect").value;
+            var contenedor = document.getElementById("contenido");
+            contenedor.innerHTML = "<h2>Ejercicios para " + dia + "</h2>";
+            rutina[dia].forEach((ej, index) => {
+                const id = "timer_" + index;
+                const cid = "counter_" + index;
+                contenedor.innerHTML += `
+                    <div class="exercise">
+                        <strong>${ej.ejercicio}</strong> - ${ej.series} series x ${ej.reps} reps (${ej.peso})
+                        <span class="timer" id="${id}"></span>
+                        <span class="counter" id="${cid}">0</span> pausas
+                        <button onclick="startCountdown('${id}', '${cid}', 60)">Iniciar descanso</button>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</head>
+<body>
+    <h1>Cronograma de Entrenamiento - Andres</h1>
+    <label for="diaSelect"><strong>Selecciona un día:</strong></label>
+    <select id="diaSelect" onchange="mostrarDia()">
+        <option value="">-- Selecciona --</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+    </select>
+    <div id="contenido" style="margin-top: 20px;"></div>
+</body>
+</html>
