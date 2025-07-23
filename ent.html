@@ -1,20 +1,83 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <title>Entrenamiento Interactivo - Andres</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        h1 { color: #2c3e50; }
-        .exercise { margin-bottom: 20px; }
-        .timer, .counter { font-weight: bold; color: #e74c3c; }
-        select { font-size: 16px; padding: 5px; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .exercise {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        .timer, .counter {
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 1.1em;
+        }
+        select {
+            font-size: 18px;
+            padding: 10px;
+            width: 100%;
+            max-width: 300px;
+            display: block;
+            margin: 0 auto 30px auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 15px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+            margin: 10px 5px;
+            transition: background-color 0.3s ease;
+            width: calc(100% - 20px);
+            max-width: 300px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        @media (max-width: 600px) {
+            body {
+                margin: 10px;
+            }
+            h1 {
+                font-size: 1.8em;
+            }
+            .exercise {
+                padding: 15px;
+            }
+            select, button {
+                font-size: 16px;
+                padding: 12px 20px;
+            }
+        }
     </style>
 </head>
 <body>
     <h1>Entrenamiento Interactivo - Andres</h1>
-    <label for="daySelect">Selecciona el día:</label>
+    <label for="daySelect" style="display: block; text-align: center; margin-bottom: 10px; font-size: 1.1em;">Selecciona el día:</label>
     <select id="daySelect" onchange="showExercises()">
         <option value="">-- Selecciona --</option>
 <option value="Lunes">Lunes</option>
@@ -61,19 +124,34 @@
 
         function speak(text) {
             const utterance = new SpeechSynthesisUtterance(text);
+            // Optional: Set voice or language if needed
+            // utterance.lang = 'es-ES'; // Uncomment and set if you need a specific Spanish voice
             speechSynthesis.speak(utterance);
         }
 
-        function startVoiceCount(reps, id) {
-            let count = 1;
-            const interval = setInterval(() => {
-                if (count > reps) {
-                    clearInterval(interval);
+        function startVoiceCount(exerciseName, reps, id) {
+            speak(exerciseName); // Announce the exercise name first
+
+            let countdown = 3;
+            const countdownInterval = setInterval(() => {
+                if (countdown > 0) {
+                    speak(countdown.toString());
+                    countdown--;
                 } else {
-                    speak(count.toString());
-                    count++;
+                    clearInterval(countdownInterval);
+                    speak("¡Comienza!"); // Announce "Start!" or similar
+                    let count = 1;
+                    const repInterval = setInterval(() => {
+                        if (count > reps) {
+                            clearInterval(repInterval);
+                            speak("¡Terminado!"); // Announce "Finished!"
+                        } else {
+                            speak(count.toString());
+                            count++;
+                        }
+                    }, 2500); // Interval for repetitions
                 }
-            }, 1500);
+            }, 1500); // Interval for countdown (1 second per number)
         }
 
         function startRestTimer(id, counterId) {
@@ -88,6 +166,7 @@
                 if (seconds <= 0) {
                     clearInterval(interval);
                     timer.innerHTML = "¡Descanso terminado!";
+                    speak("Descanso terminado."); // Announce rest finished
                 } else {
                     let min = Math.floor(seconds / 60);
                     let sec = seconds % 60;
@@ -109,7 +188,7 @@
                     container.innerHTML += `
                         <div class="exercise">
                             <h3>${ex.name} - 4 series x  ${ex.reps} repeticiones</h3>
-                            <button onclick="startVoiceCount(${ex.reps}, '${exId}')">Iniciar conteo en voz alta</button>
+                            <button onclick="startVoiceCount('${ex.name}', ${ex.reps}, '${exId}')">Iniciar conteo en voz alta</button>
                             <button onclick="startRestTimer('${exId}', '${countId}')">Iniciar descanso</button>
                             <div class="timer" id="${exId}"></div>
                             <div>Descansos realizados: <span class="counter" id="${countId}">0</span></div>
