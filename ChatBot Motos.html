@@ -1,0 +1,44 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Proyecto Chatbot - Universidad Central</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+        header {
+            background-color: #003366;
+            color: white;
+            padding: 20px;
+        }
+        main {
+            margin: 40px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Proyecto de la Universidad Central</h1>
+        <h2>Materia: 8203_GRUPO 1 - INTELIGENCIA ARTIFICIAL PARA LAS ORGANIZACIONES</h2>
+    </header>
+    <main>
+        <p>Este proyecto consiste en un chatbot para un concesionario de motos, desarrollado como parte del curso de Inteligencia Artificial.</p>
+    </main>
+
+    <!-- Código del chatbot de Dialogflow -->
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      intent="WELCOME"
+      chat-title="NewAgent"
+      agent-id="eaaf115f-1174-4ff5-b7d3-28cf35a636bc"
+      language-code="es"
+    ></df-messenger>
+</body>
+</html>
