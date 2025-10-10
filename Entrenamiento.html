@@ -305,9 +305,8 @@
 
                     container.innerHTML += `
                         <div class="exercise">
-                            <h3>${ex.name}</h3>
-							<h3>4 series x ${ex.reps} repeticiones</h3>
-
+                            <h3>${ex.name}<br>4 series x ${ex.reps} repeticiones </h3>
+							
                             <div class="controls-row">
                                 <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo</button>
                                 <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
