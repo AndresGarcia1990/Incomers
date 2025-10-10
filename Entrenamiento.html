@@ -147,9 +147,9 @@
 
             ],
             "Miércoles": [
-                {name: "Crunch con peso", reps: 13},
-                {name: "Elevaciones de piernas", reps: 13},
-                {name: "Plancha", reps: 30},
+                {name: "Crunch con peso", reps: 15},
+                {name: "Elevaciones de piernas", reps: 15},
+                {name: "Plancha", reps: 60},
             ],
             "Jueves": [
                 {name: "Press de pecho con mancuernas", reps: 12},
@@ -309,8 +309,8 @@
 
                             <div class="controls-row">
                                 <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo en voz alta</button>
-                                <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar conteo</button>
-                                <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso (60s)</button>
+                                <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
+                                <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso</button>
                             </div>
 
                             <div class="timer" id="${exId}"></div>
@@ -318,8 +318,8 @@
                             <div class="series-row">
                                 <span class="series-label">Series realizadas:</span>
                                 <span class="counter" id="${seriesCountId}">0</span>
-                                <button class="btn-small" onclick="incrementSeries('${seriesCountId}')">+ Serie</button>
-                                <button class="btn-small" onclick="decrementSeries('${seriesCountId}')">- Serie</button>
+                                <button class="btn-small" onclick="incrementSeries('${seriesCountId}')">+</button>
+                                <button class="btn-small" onclick="decrementSeries('${seriesCountId}')">-</button>
                             </div>
                         </div>
                     `;
