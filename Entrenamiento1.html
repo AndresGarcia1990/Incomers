@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Entrenamiento Interactivo - Andres</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root{
+            --primary:#3498db;
+            --primary-hover:#2980b9;
+            --bg:#f4f4f4;
+            --text:#333;
+            --title:#2c3e50;
+            --alert:#e74c3c;
+            --success:#27ae60; /* Nuevo color para el resumen */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        h1 {
+            color: var(--title);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .exercise {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        .exercise h3 {
+            text-align: center;
+            margin-top: 0;
+            /* Estilo para simular el <br> de forma segura */
+            display: flex;
+            flex-direction: column;
+        }
+        .exercise h3 span:last-child {
+            font-size: 0.7em; /* Hacer la repetición más pequeña */
+            font-weight: normal;
+            margin-top: 5px;
+        }
+        .timer, .counter {
+            font-weight: bold;
+            color: var(--alert);
+            margin-top: 10px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        label.selector-label {
+            display:block; 
+            text-align:center; 
+            margin-bottom: 10px; 
+            font-size: 1.05em;
+        }
+        select, button {
+            font-size: 18px;
+            padding: 12px 16px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+        select {
+            width: 100%;
+            max-width: 320px;
+            display: block;
+            margin: 0 auto 14px auto;
+            background:#fff;
+        }
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover { background-color: var(--primary-hover); }
+        .controls-row{
+            display:flex;
+            flex-wrap: wrap;
+            gap:10px;
+            justify-content: center;
+            margin-top: 12px;
+        }
+        .btn-wide{ width: 100%; max-width: 320px; }
+        .btn-mid{ width:160px; }
+        .btn-small{ width:100px; }
+        .series-row{
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            gap:10px;
+            margin-top: 10px;
+            flex-wrap:wrap;
+        }
+        .series-label{
+            font-weight:bold;
+        }
+
+        /* Estilos para la tabla resumen */
+        #summaryContainer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+            text-align: center;
+        }
+        #summaryContainer h2 {
+            color: var(--success);
+        }
+        #summaryTable {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        #summaryTable th, #summaryTable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        #summaryTable th {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+        }
+        #summaryTable td:nth-child(2) { /* Columna de Series */
+            text-align: center;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
+        @media (max-width: 600px) {
+            body { margin: 10px; }
+            h1 { font-size: 1.8em; }
+            .exercise { padding: 15px; }
+            select, button {
+                font-size: 16px;
+                padding: 12px 14px;
+            }
+            .btn-mid{ width:48%; }
+            .btn-small{ width:48%; }
+        }
+    </style>
+</head>
+<body>
+    <h1>Entrenamiento Interactivo - Andres</h1>
+
+    <label for="daySelect" class="selector-label">Selecciona el día:</label>
+    <select id="daySelect" onchange="showExercises()">
+        <option value="">-- Selecciona --</option>
+        <option value="Lunes">Lunes</option>
+        <option value="Martes">Martes</option>
+        <option value="Miércoles">Miércoles</option>
+        <option value="Jueves">Jueves</option>
+        <option value="Viernes">Viernes</option>
+    </select>
+
+    <label for="repIntervalSelect" class="selector-label">Velocidad del conteo <br>(segundos por repetición):</label>
+    <select id="repIntervalSelect">
+        <option value="1">1 s</option>
+        <option value="2" selected>2 s</option>
+        <option value="3">3 s</option>
+        <option value="4">4 s</option>
+        <option value="5">5 s</option>
+        <option value="6">6 s</option>
+    </select>
+
+    <div id="exerciseContainer"></div>
+    
+    <div id="summaryContainer">
+        <button class="btn-wide" onclick="createSummaryTable()">Generar Resumen del Día</button>
+        <div id="summaryTableContainer"></div>
+    </div>
+
+
+    <script>
+        // --- Datos de los ejercicios (con pecho integrado y "Hip Thrust" el lunes) ---
+        const exercises = {
+            "Lunes": [
+                {name: "Sentadillas", reps: 13},
+                {name: "Hip thrust", reps: 13},
+                {name: "Peso muerto rumano", reps: 13},
+                {name: "Zancadas", reps: 13},
+            ],
+            "Martes": [
+                {name: "Remo con mancuernas", reps: 13},
+                {name: "Pull-over", reps: 13},
+                {name: "Superman", reps: 13},
+                {name: "Curl de bíceps", reps: 13},
+            ],
+            "Miércoles": [
+                {name: "Crunch con peso", reps: 15},
+                {name: "Elevaciones de piernas", reps: 15},
+                {name: "Plancha", reps: 60},
+            ],
+            "Jueves": [
+                {name: "Press de pecho con mancuernas", reps: 12},
+                {name: "Aperturas con mancuernas", reps: 12},
+                {name: "Press inclinado con mancuernas", reps: 12},
+                {name: "Press militar", reps: 13},
+                {name: "Extensión de tríceps", reps: 13},
+            ],
+            // Viernes: mixto incluyendo pecho
+            "Viernes": [
+                {name: "Sentadillas", reps: 12},
+                {name: "Remo con mancuernas", reps: 12},
+                {name: "Crunch con peso", reps: 15},
+                {name: "Curl de bíceps", reps: 12},
+                {name: "Press militar", reps: 12},
+                {name: "Plancha", reps: 30},
+                {name: "Flexiones", reps: 15},         
+            ],
+        };
+
+        // --- Estado por ejercicio (temporizadores y progresos) ---
+        // Se mantiene la estructura para la lógica de los temporizadores
+        const state = {}; 
+        // Array para almacenar los IDs de los contadores de series generados en el día
+        let currentSeriesCounterIds = []; 
+
+        function speak(text) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            speechSynthesis.speak(utterance);
+        }
+
+        function clearTimersFor(id){
+            if (!state[id]) return;
+            if (state[id].countdownInterval) clearInterval(state[id].countdownInterval);
+            if (state[id].repInterval) clearInterval(state[id].repInterval);
+            if (state[id].restInterval) clearInterval(state[id].restInterval);
+            state[id].countdownInterval = null;
+            state[id].repInterval = null;
+            state[id].restInterval = null;
+        }
+
+        function startVoiceCount(exerciseName, reps, id, pauseBtnId) {
+            // ... (Función startVoiceCount sin cambios relevantes para este tema) ...
+            if (!state[id]) state[id] = {};
+            clearTimersFor(id);
+            speechSynthesis.cancel(); 
+
+            const seconds = parseInt(document.getElementById('repIntervalSelect').value || '2', 10);
+            state[id].paused = false;
+            state[id].countdown = 3;
+            state[id].current = 1;
+            state[id].reps = reps;
+            state[id].repMs = seconds * 1000;
+
+            const pauseBtn = document.getElementById(pauseBtnId);
+            if (pauseBtn) pauseBtn.innerText = 'Pausar conteo';
+
+            speak(exerciseName);
+
+            state[id].countdownInterval = setInterval(() => {
+                if (state[id].paused) return;
+                if (state[id].countdown > 0) {
+                    speak(state[id].countdown.toString());
+                    state[id].countdown--;
+                } else {
+                    clearInterval(state[id].countdownInterval);
+                    speak("¡Comienza!");
+                    state[id].repInterval = setInterval(() => {
+                        if (state[id].paused) return;
+                        if (state[id].current > state[id].reps) {
+                            clearInterval(state[id].repInterval);
+                            speak("¡Terminado!");
+                        } else {
+                            speak(state[id].current.toString());
+                            state[id].current++;
+                        }
+                    }, state[id].repMs);
+                }
+            }, 1000);
+        }
+
+        function togglePause(id, pauseBtnId){
+            // ... (Función togglePause sin cambios relevantes para este tema) ...
+            if (!state[id]) return;
+            state[id].paused = !state[id].paused;
+            const btn = document.getElementById(pauseBtnId);
+            if (state[id].paused){
+                speechSynthesis.pause();
+                if (btn) btn.innerText = 'Reanudar conteo';
+            } else {
+                speechSynthesis.resume();
+                if (btn) btn.innerText = 'Pausar conteo';
+            }
+        }
+
+        function startRestTimer(id) {
+            // ... (Función startRestTimer sin cambios relevantes para este tema) ...
+            let seconds = 60;
+            const timer = document.getElementById(id);
+            if (!timer) return;
+
+            if (!state[id]) state[id] = {};
+            if (state[id].restInterval) clearInterval(state[id].restInterval);
+
+            state[id].restInterval = setInterval(() => {
+                if (seconds <= 0) {
+                    clearInterval(state[id].restInterval);
+                    timer.innerHTML = "¡Descanso terminado!";
+                    speak("Descanso terminado.");
+                } else {
+                    let min = Math.floor(seconds / 60);
+                    let sec = seconds % 60;
+                    timer.innerHTML = min + "m " + sec + "s";
+                    seconds--;
+                }
+            }, 1000);
+        }
+
+        function incrementSeries(counterId){
+            const el = document.getElementById(counterId);
+            if (!el) return;
+            let count = parseInt(el.innerText) || 0;
+            el.innerText = count + 1;
+        }
+
+        function decrementSeries(counterId){
+            const el = document.getElementById(counterId);
+            if (!el) return;
+            let count = parseInt(el.innerText) || 0;
+            el.innerText = Math.max(0, count - 1);
+        }
+
+        function destroyAllIntervals(){
+            for (const k in state){
+                clearTimersFor(k);
+            }
+            speechSynthesis.cancel();
+        }
+
+        function showExercises() {
+            const day = document.getElementById("daySelect").value;
+            const container = document.getElementById("exerciseContainer");
+            container.innerHTML = "";
+            destroyAllIntervals();
+            currentSeriesCounterIds = []; // Reinicia los IDs de los contadores
+
+            if (exercises[day]) {
+                // Para evitar el problema de innerHTML += y mantener los IDs en JavaScript
+                const fragment = document.createDocumentFragment(); 
+
+                exercises[day].forEach((ex, index) => {
+                    const exId = `timer${index}`;
+                    const seriesCountId = `seriesCounter${index}`;
+                    const pauseBtnId = `pauseBtn${index}`;
+                    
+                    // Almacena el ID junto con el nombre del ejercicio
+                    currentSeriesCounterIds.push({ name: ex.name, id: seriesCountId }); 
+
+                    const exerciseDiv = document.createElement('div');
+                    exerciseDiv.className = 'exercise';
+                    
+                    // --- Solución al problema del <br> y el HTML ---
+                    // Se usa la estructura con <span> y CSS para el salto de línea.
+                    exerciseDiv.innerHTML = `
+                        <h3>
+                            <span>${ex.name}</span>
+                            <span>4 series x ${ex.reps} repeticiones</span>
+                        </h3>
+                        
+                        <div class="controls-row">
+                            <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo</button>
+                            <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
+                            <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso</button>
+                        </div>
+
+                        <div class="timer" id="${exId}"></div>
+
+                        <div class="series-row">
+                            <span class="series-label">Series realizadas:</span>
+                            <span class="counter" id="${seriesCountId}">0</span>
+                            <button class="btn-small" onclick="incrementSeries('${seriesCountId}')">+</button>
+                            <button class="btn-small" onclick="decrementSeries('${seriesCountId}')">-</button>
+                        </div>
+                    `;
+                    
+                    fragment.appendChild(exerciseDiv);
+                });
+                
+                // Añade todos los ejercicios de una sola vez
+                container.appendChild(fragment); 
+            }
+            
+            // Limpia el resumen anterior
+            document.getElementById("summaryTableContainer").innerHTML = '';
+        }
+
+        // --- NUEVA FUNCIÓN: Generar Tabla Resumen ---
+        function createSummaryTable() {
+            const container = document.getElementById("summaryTableContainer");
+            const day = document.getElementById("daySelect").value;
+            
+            if (!day || currentSeriesCounterIds.length === 0) {
+                container.innerHTML = "<p>Por favor, selecciona un día para ver los ejercicios.</p>";
+                return;
+            }
+            
+            let tableHTML = `
+                <h2>Resumen de Series del ${day}</h2>
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Ejercicio</th>
+                            <th>Series Realizadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            currentSeriesCounterIds.forEach(item => {
+                const seriesElement = document.getElementById(item.id);
+                const seriesCount = seriesElement ? seriesElement.innerText : '0';
+                
+                tableHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${seriesCount}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+        }
+    </script>
+</body>
+</html>
