@@ -118,7 +118,7 @@
         <option value="Viernes">Viernes</option>
     </select>
 
-    <label for="repIntervalSelect" class="selector-label">Velocidad del conteo (segundos por repetición):</label>
+    <label for="repIntervalSelect" class="selector-label">Velocidad del conteo <br>(segundos por repetición):</label>
     <select id="repIntervalSelect">
         <option value="1">1 s</option>
         <option value="2" selected>2 s</option>
@@ -305,10 +305,11 @@
 
                     container.innerHTML += `
                         <div class="exercise">
-                            <h3>${ex.name} - 4 series x ${ex.reps} repeticiones</h3>
+                            <h3>${ex.name}
+							- 4 series x ${ex.reps} repeticiones</h3>
 
                             <div class="controls-row">
-                                <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo en voz alta</button>
+                                <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo</button>
                                 <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
                                 <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso</button>
                             </div>
