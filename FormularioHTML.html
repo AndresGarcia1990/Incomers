@@ -1,0 +1,109 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro de Factura</title>
+</head>
+<body>
+    <h2>Registrar Factura en Firebase</h2>
+    <form id="facturaForm">
+        <label>ID Factura:</label><br>
+        <input type="text" id="id_factura" required><br><br>
+
+        <label>Título:</label><br>
+        <input type="text" id="titulo" required><br><br>
+
+        <label>Fecha de Ingreso:</label><br>
+        <input type="date" id="fecha_ingreso" required><br><br>
+
+        <label>Remitente:</label><br>
+        <input type="text" id="remitente" required><br><br>
+
+        <label>Destinatarios:</label><br>
+        <input type="text" id="destinatarios" required><br><br>
+
+        <label>Estado de Entrega:</label><br>
+        <input type="text" id="estado_entrega" required><br><br>
+
+        <label>Carpeta actual de Recepción:</label><br>
+        <input type="text" id="carpeta_recepcion" required><br><br>
+
+        <label>Cuerpo del Correo:</label><br>
+        <textarea id="cuerpo_correo" rows="4" cols="50"></textarea><br><br>
+
+        <label>Código F:</label><br>
+        <input type="text" id="codigo_f" required><br><br>
+
+        <label>NIT:</label><br>
+        <input type="text" id="nit" required><br><br>
+
+        <label>Número de Factura:</label><br>
+        <input type="text" id="numero_factura" required><br><br>
+
+        <button type="submit">Guardar en Firebase</button>
+    </form>
+
+    <script type="module">
+        // Importar SDKs de Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        // Configuración Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+            authDomain: "incomers-bee7d.firebaseapp.com",
+            projectId: "incomers-bee7d",
+            storageBucket: "incomers-bee7d.firebasestorage.app",
+            messagingSenderId: "821388332213",
+            appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+            measurementId: "G-88PT3PBF1N"
+        };
+
+        // Inicializar Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Manejar el envío del formulario
+        document.getElementById('facturaForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Capturar valores
+            const id_factura = document.getElementById('id_factura').value;
+            const titulo = document.getElementById('titulo').value;
+            const fecha_ingreso = document.getElementById('fecha_ingreso').value;
+            const remitente = document.getElementById('remitente').value;
+            const destinatarios = document.getElementById('destinatarios').value;
+            const estado_entrega = document.getElementById('estado_entrega').value;
+            const carpeta_recepcion = document.getElementById('carpeta_recepcion').value;
+            const cuerpo_correo = document.getElementById('cuerpo_correo').value;
+            const codigo_f = document.getElementById('codigo_f').value;
+            const nit = document.getElementById('nit').value;
+            const numero_factura = document.getElementById('numero_factura').value;
+
+            try {
+                // Guardar en Firestore con ID personalizado
+                await setDoc(doc(db, "CorreosCompras", id_factura), {
+                    "Título": titulo,
+                    "Fecha de Ingreso": fecha_ingreso,
+                    "Remitente": remitente,
+                    "Destinatarios": destinatarios,
+                    "Estado de Entrega": estado_entrega,
+                    "Carpeta actual de Recepción": carpeta_recepcion,
+                    "CuerpoCorreo": cuerpo_correo,
+                    "Código F": codigo_f,
+                    "NIT": nit,
+                    "Numero factura": numero_factura
+                });
+
+                alert("Factura guardada correctamente en Firebase");
+                document.getElementById('facturaForm').reset();
+            } catch (error) {
+                console.error("Error al guardar en Firebase:", error);
+                alert("Error al guardar la factura");
+            }
+        });
+    </script>
+</body>
+</html>
