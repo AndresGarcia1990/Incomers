@@ -71,23 +71,6 @@
       text-align: center;
     }
     #lifelines button { margin: 5px; }
-    h2 {
-      margin-top: 18px;
-      border-top: 1px solid rgba(255,255,255,0.25);
-      padding-top: 10px;
-    }
-    #scoresList {
-      margin-top: 10px;
-      text-align: left;
-      max-height: 240px;
-      overflow-y: auto;
-      padding: 10px;
-      border: 1px solid #ccc;
-      background: rgba(255,255,255,0.1);
-      border-radius: 6px;
-      list-style: none;
-    }
-    #scoresList li { margin-bottom: 6px; }
   </style>
 </head>
 <body>
@@ -107,9 +90,6 @@
       <button id="fifty-fifty">50:50</button>
       <button id="ask-friend">Preguntar a un amigo</button>
     </div>
-
-    <h2>Lista de Puntuaciones</h2>
-    <ul id="scoresList"></ul>
   </div>
 
   <script type="module">
@@ -119,10 +99,7 @@
     import {
       getFirestore,
       collection,
-      addDoc,
-      getDocs,
-      query,
-      orderBy
+      addDoc
     } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -308,7 +285,7 @@
           const timeTaken = (endTime - startTime) / 1000; // en segundos
           saveScore(username, score, timeTaken);
           alert(`¡Felicidades, ${username}! Has ganado $${score}. Tiempo: ${timeTaken} s.`);
-          // Tras ganar, podrías también reiniciar si lo deseas:
+          // Si deseas también reiniciar al ganar, descomenta:
           // restartGame();
         }
       } else {
@@ -318,7 +295,7 @@
         saveScore(username, score, timeTaken);
         alert(`Juego terminado. Premio final: $${score}. Tiempo: ${timeTaken} s.`);
 
-        // >>> Reiniciar y volver al inicio al equivocarse <<<
+        // Reiniciar y volver al inicio al equivocarse
         restartGame();
       }
     }
@@ -369,7 +346,7 @@
     document.getElementById("ask-friend").onclick = askFriend;
     loadQuestion();
 
-    // ===== Persistencia de puntuaciones (fecha y hora + orden ascendente) =====
+    // ===== Persistencia de puntuaciones (fecha y hora) =====
     async function saveScore(name, score, timeTaken) {
       const now = new Date();
       const fechaHoraISO = now.toISOString(); // ideal para ordenamiento/consultas
@@ -387,51 +364,12 @@
           fechaHoraISO,        // 2026-02-10T18:40:22.345Z
           fechaHoraLocal       // 10/2/2026, 13:40:22 GMT-5
         });
-        loadScores();
+        // Ya no se muestra la lista dentro del juego
       } catch (e) {
         console.error("Error al agregar el documento: ", e);
         alert("Hubo un error al guardar la información.");
       }
     }
-
-    // Carga de posiciones: orden de más antiguo a más reciente
-    async function loadScores() {
-      try {
-        const scoresRef = collection(db, "scores");
-        const q = query(scoresRef, orderBy('fechaHoraISO', 'asc')); // ascendente
-        const querySnapshot = await getDocs(q);
-
-        const scoresList = document.getElementById("scoresList");
-        scoresList.innerHTML = "";
-
-        querySnapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-
-          // Compatibilidad: si un registro viejo no tiene fechaHoraLocal/ISO
-          let fechaMostrada = "s/f";
-          if (data.fechaHoraLocal) {
-            fechaMostrada = data.fechaHoraLocal;
-          } else if (data.fechaHoraISO) {
-            try {
-              fechaMostrada = new Date(data.fechaHoraISO).toLocaleString('es-CO', {
-                year: 'numeric', month: 'numeric', day: 'numeric',
-                hour: '2-digit', minute: '2-digit', second: '2-digit'
-              });
-            } catch(_) {}
-          } else if (data.fecha) {
-            fechaMostrada = data.fecha; // campo antiguo
-          }
-
-          const li = document.createElement("li");
-          li.textContent = `Nombre: ${data.nombre}, Puntuación: ${data.puntuacion}, Fecha y hora: ${fechaMostrada}, Tiempo: ${data.tiempo} s`;
-          scoresList.appendChild(li);
-        });
-      } catch (e) {
-        console.error("Error al cargar puntuaciones: ", e);
-      }
-    }
-
-    window.onload = loadScores;
   </script>
 </body>
 </html>
