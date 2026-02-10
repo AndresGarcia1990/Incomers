@@ -1,117 +1,188 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lista de Puntuaciones</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        #scores-container {
-            width: 80%;
-            max-width: 800px;
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        #scoresTableWrapper { /* Nuevo contenedor para la tabla */
-            max-height: 600px; /* Establecer una altura máxima */
-            overflow-y: auto; /* Agregar scroll vertical cuando sea necesario */
-            margin-top: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f2f2f2;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lista de Puntuaciones</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #f0f0f0;
+      color: #333;
+    }
+    #scores-container {
+      width: 90%;
+      max-width: 900px;
+      background-color: #fff;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; color: #333; margin: 0 0 10px; }
+    .hint { text-align: center; color: #666; font-size: 14px; margin-bottom: 10px; }
+    #scoresTableWrapper {
+      max-height: 600px; /* scroll si crece */
+      overflow-y: auto;
+      margin-top: 10px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background-color: #f2f2f2;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    .right { text-align: right; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace; }
+  </style>
 </head>
 <body>
-    <div id="scores-container">
-        <h1>Lista de Puntuaciones</h1>
-        <div id="scoresTableWrapper">
-            <table id="scoresTable">
-                <thead>
-                    <tr>
-                        <th>Nombre</th>
-                        <th>Puntuación</th>
-                        <th>Fecha</th>
-                        <th>Tiempo (segundos)</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+  <div id="scores-container">
+    <h1>Lista de Puntuaciones</h1>
+    <div class="hint">Orden: 1) Puntuación ↓  2) Fecha y hora (más antigua primero)  3) Tiempo (segundos) ↑</div>
+
+    <div id="scoresTableWrapper">
+      <table id="scoresTable">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th class="right">Puntuación</th>
+            <th>Fecha y hora</th>
+            <th class="right">Tiempo (s)</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    <script type="module">
-        // Importar las funciones necesarias desde los SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+  </div>
 
-        // Configuración de Firebase
-        const firebaseConfig = {
-            apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
-            authDomain: "incomers-bee7d.firebaseapp.com",
-            projectId: "incomers-bee7d",
-            storageBucket: "incomers-bee7d.firebasestorage.app",
-            messagingSenderId: "821388332213",
-            appId: "1:821388332213:web:0170ab2584f136fa5682fc",
-            measurementId: "G-88PT3PBF1N"
-        };
+  <script type="module">
+    // ===== Firebase v11 (modular) =====
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      getDocs
+      // Podríamos usar query/orderBy si quisiéramos orden del lado servidor,
+      // pero aquí ordenamos en el cliente para mantener compatibilidad con registros antiguos.
+    } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
 
-        // Inicializar Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // Configuración de Firebase (igual a tu versión actual)
+    const firebaseConfig = {
+      apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+      authDomain: "incomers-bee7d.firebaseapp.com",
+      projectId: "incomers-bee7d",
+      storageBucket: "incomers-bee7d.firebasestorage.app",
+      messagingSenderId: "821388332213",
+      appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+      measurementId: "G-88PT3PBF1N"
+    };
 
-        async function loadScores() {
-            const querySnapshot = await getDocs(collection(db, "scores"));
-            const scoresTableBody = document.querySelector("#scoresTable tbody");
+    const app = initializeApp(firebaseConfig);
+    const db  = getFirestore(app);
 
-            let scores = [];
+    // ---- Helpers de normalización/compatibilidad ----
+    function toNumber(x, fallback = 0) {
+      const n = Number(x);
+      return Number.isFinite(n) ? n : fallback;
+    }
 
-            querySnapshot.forEach((doc) => {
-                scores.push(doc.data());
-            });
+    // Obtiene un timestamp (ms) para ordenar por fecha ascendente.
+    // Prioridad: fechaHoraISO -> fechaHoraLocal (parse) -> fecha (YYYY-MM-DD) -> 0
+    function getTimestampMs(data) {
+      if (data.fechaHoraISO) {
+        const t = Date.parse(data.fechaHoraISO);
+        if (Number.isFinite(t)) return t;
+      }
+      if (data.fechaHoraLocal) {
+        const t = Date.parse(data.fechaHoraLocal);
+        if (Number.isFinite(t)) return t;
+      }
+      if (data.fecha) {
+        // Registros viejos: solo fecha (sin hora). Asumimos 00:00:00 local.
+        const t = new Date(`${data.fecha}T00:00:00`).getTime();
+        if (Number.isFinite(t)) return t;
+      }
+      return 0; // sin fecha
+    }
 
-            // Ordenar por puntuación y tiempo
-            scores.sort((a, b) => b.puntuacion - a.puntuacion || a.tiempo - b.tiempo);
+    // Devuelve un string legible "fecha y hora" para mostrar.
+    function getFechaMostrada(data) {
+      if (data.fechaHoraLocal) return data.fechaHoraLocal;
+      if (data.fechaHoraISO) {
+        try {
+          return new Date(data.fechaHoraISO).toLocaleString("es-CO", {
+            year: "numeric", month: "numeric", day: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            timeZoneName: "short"
+          });
+        } catch (_) {}
+      }
+      if (data.fecha) {
+        try {
+          // Muestra la fecha antigua con hora 00:00:00 para “corregir” la presentación
+          return new Date(`${data.fecha}T00:00:00`).toLocaleString("es-CO", {
+            year: "numeric", month: "numeric", day: "numeric",
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+          });
+        } catch (_) {}
+        return `${data.fecha} 00:00:00`;
+      }
+      return "s/f";
+    }
 
-            scoresTableBody.innerHTML = ""; // Limpiar la tabla antes de agregar nuevos elementos
+    async function loadScores() {
+      const querySnapshot = await getDocs(collection(db, "scores"));
+      const scoresTableBody = document.querySelector("#scoresTable tbody");
 
-            scores.forEach((data) => {
-                const row = document.createElement("tr");
-                row.innerHTML = `
-                    <td>${data.nombre}</td>
-                    <td>${data.puntuacion}</td>
-                    <td>${data.fecha}</td>
-                    <td>${data.tiempo}</td>
-                `;
-                scoresTableBody.appendChild(row);
-            });
-        }
+      const scores = [];
+      querySnapshot.forEach((doc) => {
+        const d = doc.data();
+        scores.push({
+          nombre: d.nombre ?? "—",
+          puntuacion: toNumber(d.puntuacion, 0),
+          tiempo: Number.isFinite(Number(d.tiempo)) ? Number(d.tiempo) : Number.POSITIVE_INFINITY,
+          fechaMostrada: getFechaMostrada(d),
+          ts: getTimestampMs(d)
+        });
+      });
 
-        // Cargar los documentos cuando la página se carga
-        window.onload = loadScores;
-    </script>
+      // ===== Orden solicitado =====
+      // 1) Mayor puntuación (desc)
+      // 2) Fecha y hora más antigua (asc)
+      // 3) Mejor tiempo en segundos (asc)
+      scores.sort((a, b) =>
+        (b.puntuacion - a.puntuacion) ||
+        (a.ts - b.ts) ||
+        (a.tiempo - b.tiempo)
+      );
+
+      // Render
+      scoresTableBody.innerHTML = "";
+      for (const s of scores) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${s.nombre}</td>
+          <td class="right">${s.puntuacion}</td>
+          <td class="mono">${s.fechaMostrada}</td>
+          <td class="right">${Number.isFinite(s.tiempo) ? s.tiempo : "—"}</td>
+        `;
+        scoresTableBody.appendChild(tr);
+      }
+    }
+
+    window.onload = loadScores;
+  </script>
 </body>
 </html>
