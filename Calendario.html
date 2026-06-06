@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Calendario de Entrenamientos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #3498db;
+            --primary-hover: #2980b9;
+            --success: #27ae60;
+            --bg: #f4f4f4;
+            --title: #2c3e50;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 20px;
+            color: #333;
+        }
+        h1, h2 {
+            text-align: center;
+            color: var(--title);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* Estilos de la Navegación del Calendario */
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+        }
+        .calendar-header span {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--title);
+            min-width: 180px;
+            text-align: center;
+        }
+        .btn-nav {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            font-size: 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: bold;
+        }
+        .btn-nav:hover {
+            background-color: var(--primary-hover);
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .weekday {
+            font-weight: bold;
+            background-color: #eee;
+            padding: 10px 0;
+            border-radius: 4px;
+        }
+        .day {
+            padding: 15px 0;
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        .day:hover {
+            transform: scale(1.05);
+            background-color: #f0f0f0;
+        }
+        .day.completed {
+            background-color: var(--success) !important;
+            color: white;
+            border-color: #1e7e34;
+        }
+        .day.empty {
+            background: none;
+            border: none;
+            cursor: default;
+        }
+        .day.empty:hover {
+            transform: none;
+            background: none;
+        }
+        /* Detalle del día */
+        #detailContainer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        
+        @media (max-width: 600px) {
+            .calendar-header span { font-size: 1.1em; min-width: 130px; }
+            .btn-nav { padding: 6px 10px; font-size: 13px; }
+            .day { padding: 10px 0; font-size: 14px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Historial de Entrenamientos</h1>
+    
+    <!-- Header modificado con controles de navegación -->
+    <div class="calendar-header">
+        <button class="btn-nav" id="btnPrev">◀ Mes Anterior</button>
+        <span id="monthYearTitle"></span>
+        <button class="btn-nav" id="btnNext">Mes Siguiente ▶</button>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid">
+        <!-- Encabezados estáticos de la semana -->
+        <div class="weekday">Dom</div>
+        <div class="weekday">Lun</div>
+        <div class="weekday">Mar</div>
+        <div class="weekday">Mié</div>
+        <div class="weekday">Jue</div>
+        <div class="weekday">Vie</div>
+        <div class="weekday">Sáb</div>
+    </div>
+
+    <div id="detailContainer" style="display: none;">
+        <h3 id="detailTitle">Resumen del Día</h3>
+        <table id="detailTable">
+            <thead>
+                <tr>
+                    <th>Ejercicio</th>
+                    <th>Series Completadas</th>
+                </tr>
+            </thead>
+            <tbody id="detailTableBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+      authDomain: "incomers-bee7d.firebaseapp.com",
+      projectId: "incomers-bee7d",
+      storageBucket: "incomers-bee7d.firebasestorage.app",
+      messagingSenderId: "821388332213",
+      appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+      measurementId: "G-88PT3PBF1N"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const logsByDate = {}; 
+    const today = new Date();
+    // Variables globales de estado del calendario mutables por la navegación
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+
+    const meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+
+    async function loadFirebaseData() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "scores"));
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data.fechaHoraISO && data.detallesRutina) {
+                    const dateKey = data.fechaHoraISO.split('T')[0]; 
+                    logsByDate[dateKey] = data.detallesRutina;
+                }
+            });
+            // Renderiza por primera vez una vez los datos estén indexados
+            renderCalendar(currentMonth, currentYear);
+        } catch (error) {
+            console.error("Error recuperando registros: ", error);
+        }
+    }
+
+    function renderCalendar(month, year) {
+        const grid = document.getElementById("calendarGrid");
+        
+        // Remover celdas del render del mes pasado para no duplicar datos
+        const dayElements = grid.querySelectorAll('.day, .empty');
+        dayElements.forEach(el => el.remove());
+
+        document.getElementById("monthYearTitle").innerText = `${meses[month]} ${year}`;
+
+        const firstDayIndex = new Date(year, month, 1).getDay();
+        const totalDays = new Date(year, month + 1, 0).getDate();
+
+        // Rellenar espacios vacíos al inicio del mes
+        for (let i = 0; i < firstDayIndex; i++) {
+            const emptyCell = document.createElement("div");
+            emptyCell.className = "day empty";
+            grid.appendChild(emptyCell);
+        }
+
+        // Crear cuadrícula de días
+        for (let day = 1; day <= totalDays; day++) {
+            const dayCell = document.createElement("div");
+            dayCell.className = "day";
+            dayCell.innerText = day;
+
+            const formattedMonth = String(month + 1).padStart(2, '0');
+            const formattedDay = String(day).padStart(2, '0');
+            const dateStr = `${year}-${formattedMonth}-${formattedDay}`;
+
+            if (logsByDate[dateStr]) {
+                dayCell.classList.add("completed");
+                dayCell.addEventListener("click", () => showTrainingDetail(dateStr, day, meses[month]));
+            } else {
+                dayCell.addEventListener("click", () => {
+                    document.getElementById("detailContainer").style.display = "none";
+                    alert(`No tienes entrenamientos registrados el ${day} de ${meses[month]} de ${year}.`);
+                });
+            }
+
+            grid.appendChild(dayCell);
+        }
+    }
+
+    function showTrainingDetail(dateKey, day, monthName) {
+        const rutina = logsByDate[dateKey];
+        const tbody = document.getElementById("detailTableBody");
+        tbody.innerHTML = ""; 
+
+        document.getElementById("detailTitle").innerText = `Rutina Realizada: ${rutina.diaPlanificado} (${day} de ${monthName})`;
+
+        rutina.ejercicios.forEach(ex => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${ex.nombreEjercicio}</td>
+                <td><strong>${ex.seriesDone}</strong> series</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        document.getElementById("detailContainer").style.display = "block";
+        document.getElementById("detailContainer").scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // --- FUNCIONES DE NAVEGACIÓN DE MESES ---
+    function changeMonth(direction) {
+        // Ocultar detalles abiertos del mes previo para evitar confusiones visuales
+        document.getElementById("detailContainer").style.display = "none";
+        
+        currentMonth += direction;
+
+        // Validaciones si cruzamos límites de año (hacia atrás o hacia adelante)
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        } else if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+
+        renderCalendar(currentMonth, currentYear);
+    }
+
+    // Vinculación de eventos nativos a los botones de control
+    document.getElementById("btnPrev").addEventListener("click", () => changeMonth(-1));
+    document.getElementById("btnNext").addEventListener("click", () => changeMonth(1));
+
+    // Inicialización del flujo
+    loadFirebaseData();
+</script>
+
+</body>
+</html>

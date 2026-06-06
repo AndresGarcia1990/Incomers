@@ -12,6 +12,9 @@
             --text:#333;
             --title:#2c3e50;
             --alert:#e74c3c;
+            --success:#27ae60; 
+            --success-hover:#219653;
+            --accent: #e67e22;
         }
         body {
             font-family: Arial, sans-serif;
@@ -32,36 +35,49 @@
             margin-bottom: 20px;
             padding: 20px;
         }
-        .exercise h3{
-            text-align:center;
-            margin-top:0;
+        .exercise h3 {
+            text-align: center;
+            margin-top: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .exercise h3 span:last-child {
+            font-size: 0.7em; 
+            font-weight: normal;
+            margin-top: 5px;
         }
         .timer, .counter {
             font-weight: bold;
             color: var(--alert);
             margin-top: 10px;
             font-size: 1.1em;
-            text-align:center;
+            text-align: center;
         }
         label.selector-label {
             display:block; 
             text-align:center; 
-            margin-bottom: 10px; 
+            margin-bottom: 5px; 
             font-size: 1.05em;
+            font-weight: bold;
         }
-        select, button {
+        select, button, input[type="date"] {
             font-size: 18px;
             padding: 12px 16px;
             border: 1px solid #ccc;
             border-radius: 6px;
             box-sizing: border-box;
         }
-        select {
+        select, input[type="date"] {
             width: 100%;
             max-width: 320px;
             display: block;
             margin: 0 auto 14px auto;
             background:#fff;
+            text-align: center;
+        }
+        input[type="date"] {
+            border: 2px solid var(--accent);
+            font-family: Arial, sans-serif;
         }
         button {
             background-color: var(--primary);
@@ -78,7 +94,9 @@
             justify-content: center;
             margin-top: 12px;
         }
-        .btn-wide{ width: 100%; max-width: 320px; }
+        .btn-wide{ width: 100%; max-width: 320px; margin: 5px auto; display: block; }
+        .btn-save { background-color: var(--success); }
+        .btn-save:hover { background-color: var(--success-hover); }
         .btn-mid{ width:160px; }
         .btn-small{ width:100px; }
         .series-row{
@@ -92,11 +110,43 @@
         .series-label{
             font-weight:bold;
         }
+
+        #summaryContainer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px dashed #ccc;
+            text-align: center;
+        }
+        #summaryContainer h2 {
+            color: var(--success);
+        }
+        #summaryTable {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            border-collapse: collapse;
+            text-align: left;
+        }
+        #summaryTable th, #summaryTable td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        #summaryTable th {
+            background-color: var(--primary);
+            color: white;
+            text-align: center;
+        }
+        #summaryTable td:nth-child(2) { 
+            text-align: center;
+            font-weight: bold;
+            color: var(--success);
+        }
+        
         @media (max-width: 600px) {
             body { margin: 10px; }
             h1 { font-size: 1.8em; }
             .exercise { padding: 15px; }
-            select, button {
+            select, button, input[type="date"] {
                 font-size: 16px;
                 padding: 12px 14px;
             }
@@ -108,14 +158,19 @@
 <body>
     <h1>Entrenamiento Interactivo - Andres</h1>
 
-    <label for="daySelect" class="selector-label">Selecciona el día:</label>
-    <select id="daySelect" onchange="showExercises()">
+    <!-- NUEVO: Selector de Fecha física para guardar en el calendario -->
+    <label for="calendarDateSelect" class="selector-label" style="color: var(--accent);">Fecha en que realizas el entrenamiento:</label>
+    <input type="date" id="calendarDateSelect">
+
+    <!-- Selector de Rutina Programada -->
+    <label for="daySelect" class="selector-label">¿Qué rutina programada vas a realizar?:</label>
+    <select id="daySelect">
         <option value="">-- Selecciona --</option>
-        <option value="Lunes">Lunes</option>
-        <option value="Martes">Martes</option>
-        <option value="Miércoles">Miércoles</option>
-        <option value="Jueves">Jueves</option>
-        <option value="Viernes">Viernes</option>
+        <option value="Lunes">Lunes (Pierna)</option>
+        <option value="Martes">Martes (Espalda/Bíceps)</option>
+        <option value="Miércoles">Miércoles (Abdomen/Plancha)</option>
+        <option value="Jueves">Jueves (Pecho/Tríceps/Militar)</option>
+        <option value="Viernes">Viernes (Mixto/Pecho)</option>
     </select>
 
     <label for="repIntervalSelect" class="selector-label">Velocidad del conteo <br>(segundos por repetición):</label>
@@ -129,36 +184,64 @@
     </select>
 
     <div id="exerciseContainer"></div>
+    
+    <div id="summaryContainer">
+        <button class="btn-wide" id="btnSummary">Generar Resumen del Día</button>
+        <div id="summaryTableContainer"></div>
+        <button class="btn-wide btn-save" id="btnSaveFirebase" style="display:none;">Guardar Entrenamiento en Firebase</button>
+    </div>
 
-    <script>
-        // --- Datos de los ejercicios (con pecho integrado y "Hip Thrust" el lunes) ---
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/11.5.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyBk038Zx83YW4ciSfkJA7COa3inBC_tATY",
+          authDomain: "incomers-bee7d.firebaseapp.com",
+          projectId: "incomers-bee7d",
+          storageBucket: "incomers-bee7d.firebasestorage.app",
+          messagingSenderId: "821388332213",
+          appId: "1:821388332213:web:0170ab2584f136fa5682fc",
+          measurementId: "G-88PT3PBF1N"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // --- Configuración automática de la fecha actual al cargar ---
+        const dateInput = document.getElementById('calendarDateSelect');
+        const hoy = new Date();
+        const year = hoy.getFullYear();
+        const month = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dayStr = String(hoy.getDate()).padStart(2, '0');
+        dateInput.value = `${year}-${month}-${dayStr}`;
+
+        // --- Datos estables de los ejercicios ---
         const exercises = {
             "Lunes": [
                 {name: "Sentadillas", reps: 13},
-		{name: "Hip thrust", reps: 13},
+                {name: "Hip thrust", reps: 13},
                 {name: "Peso muerto rumano", reps: 13},
                 {name: "Zancadas", reps: 13},
             ],
             "Martes": [
                 {name: "Remo con mancuernas", reps: 13},
                 {name: "Pull-over", reps: 13},
-                {name: "Superman", reps: 13},
-		{name: "Curl de bíceps", reps: 13},
-
+                {name: "Superman", reps: 20},
+                {name: "Curl de bíceps", reps: 13},
             ],
             "Miércoles": [
-                {name: "Crunch con peso", reps: 15},
-                {name: "Elevaciones de piernas", reps: 15},
-                {name: "Plancha", reps: 60},
+                {name: "Crunch con peso", reps: 20},
+                {name: "Elevaciones de piernas", reps: 20},
+                {name: "Plancha", reps: 40},
             ],
             "Jueves": [
-                {name: "Press de pecho con mancuernas", reps: 12},
-                {name: "Aperturas con mancuernas", reps: 12},
-                {name: "Press inclinado con mancuernas", reps: 12},
+                {name: "Press de pecho con mancuernas", reps: 13},
+                {name: "Aperturas con mancuernas", reps: 13},
+                {name: "Press inclinado con mancuernas", reps: 13},
                 {name: "Press militar", reps: 13},
                 {name: "Extensión de tríceps", reps: 13},
             ],
-            // Viernes: mixto incluyendo pecho
             "Viernes": [
                 {name: "Sentadillas", reps: 12},
                 {name: "Remo con mancuernas", reps: 12},
@@ -166,15 +249,15 @@
                 {name: "Curl de bíceps", reps: 12},
                 {name: "Press militar", reps: 12},
                 {name: "Plancha", reps: 30},
-                {name: "Flexiones", reps: 15},            ],
+                {name: "Flexiones", reps: 15},         
+            ],
         };
 
-        // --- Estado por ejercicio (temporizadores y progresos) ---
-        const state = {}; // por id: { paused, countdown, current, reps, repMs, countdownInterval, repInterval, restInterval }
+        const state = {}; 
+        let currentSeriesCounterIds = []; 
 
-        function speak(text) {
+        window.speak = function(text) {
             const utterance = new SpeechSynthesisUtterance(text);
-            // Forzamos voz en español si está disponible
             utterance.lang = 'es-ES';
             speechSynthesis.speak(utterance);
         }
@@ -189,11 +272,10 @@
             state[id].restInterval = null;
         }
 
-        function startVoiceCount(exerciseName, reps, id, pauseBtnId) {
-            // reset y preparación
+        window.startVoiceCount = function(exerciseName, reps, id, pauseBtnId) {
             if (!state[id]) state[id] = {};
             clearTimersFor(id);
-            speechSynthesis.cancel(); // limpia la cola de voz
+            speechSynthesis.cancel(); 
 
             const seconds = parseInt(document.getElementById('repIntervalSelect').value || '2', 10);
             state[id].paused = false;
@@ -202,14 +284,11 @@
             state[id].reps = reps;
             state[id].repMs = seconds * 1000;
 
-            // actualizar texto del botón de pausa
             const pauseBtn = document.getElementById(pauseBtnId);
             if (pauseBtn) pauseBtn.innerText = 'Pausar conteo';
 
-            // Anunciamos el ejercicio
             speak(exerciseName);
 
-            // Cuenta regresiva (1 segundo por número)
             state[id].countdownInterval = setInterval(() => {
                 if (state[id].paused) return;
                 if (state[id].countdown > 0) {
@@ -218,7 +297,6 @@
                 } else {
                     clearInterval(state[id].countdownInterval);
                     speak("¡Comienza!");
-                    // Inicia el conteo de repeticiones a la velocidad elegida
                     state[id].repInterval = setInterval(() => {
                         if (state[id].paused) return;
                         if (state[id].current > state[id].reps) {
@@ -233,7 +311,7 @@
             }, 1000);
         }
 
-        function togglePause(id, pauseBtnId){
+        window.togglePause = function(id, pauseBtnId){
             if (!state[id]) return;
             state[id].paused = !state[id].paused;
             const btn = document.getElementById(pauseBtnId);
@@ -246,8 +324,7 @@
             }
         }
 
-        function startRestTimer(id) {
-            // Temporizador de descanso (60s) — ya no incrementa series
+        window.startRestTimer = function(id) {
             let seconds = 60;
             const timer = document.getElementById(id);
             if (!timer) return;
@@ -269,14 +346,14 @@
             }, 1000);
         }
 
-        function incrementSeries(counterId){
+        window.incrementSeries = function(counterId){
             const el = document.getElementById(counterId);
             if (!el) return;
             let count = parseInt(el.innerText) || 0;
             el.innerText = count + 1;
         }
 
-        function decrementSeries(counterId){
+        window.decrementSeries = function(counterId){
             const el = document.getElementById(counterId);
             if (!el) return;
             let count = parseInt(el.innerText) || 0;
@@ -287,7 +364,6 @@
             for (const k in state){
                 clearTimersFor(k);
             }
-            // Detener cualquier voz en cola
             speechSynthesis.cancel();
         }
 
@@ -296,37 +372,147 @@
             const container = document.getElementById("exerciseContainer");
             container.innerHTML = "";
             destroyAllIntervals();
+            currentSeriesCounterIds = []; 
+            document.getElementById("btnSaveFirebase").style.display = "none";
 
             if (exercises[day]) {
+                const fragment = document.createDocumentFragment(); 
+
                 exercises[day].forEach((ex, index) => {
                     const exId = `timer${index}`;
                     const seriesCountId = `seriesCounter${index}`;
                     const pauseBtnId = `pauseBtn${index}`;
+                    
+                    currentSeriesCounterIds.push({ name: ex.name, id: seriesCountId }); 
 
-                    container.innerHTML += `
-                        <div class="exercise">
-                            <h3>${ex.name}<br>4 series x ${ex.reps} repeticiones </h3>
-							
-                            <div class="controls-row">
-                                <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo</button>
-                                <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
-                                <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso</button>
-                            </div>
+                    const exerciseDiv = document.createElement('div');
+                    exerciseDiv.className = 'exercise';
+                    
+                    exerciseDiv.innerHTML = `
+                        <h3>
+                            <span>${ex.name}</span>
+                            <span>4 series x ${ex.reps} repeticiones</span>
+                        </h3>
+                        
+                        <div class="controls-row">
+                            <button class="btn-mid" onclick="startVoiceCount('${ex.name.replace(/'/g, "\\'")}', ${ex.reps}, '${exId}', '${pauseBtnId}')">Iniciar conteo</button>
+                            <button id="${pauseBtnId}" class="btn-mid" onclick="togglePause('${exId}', '${pauseBtnId}')">Pausar</button>
+                            <button class="btn-mid" onclick="startRestTimer('${exId}')">Iniciar descanso</button>
+                        </div>
 
-                            <div class="timer" id="${exId}"></div>
+                        <div class="timer" id="${exId}"></div>
 
-                            <div class="series-row">
-                                <span class="series-label">Series realizadas:</span>
-                                <span class="counter" id="${seriesCountId}">0</span>
-								<br>
-                                <button class="btn-small" onclick="incrementSeries('${seriesCountId}')">+</button>
-                                <button class="btn-small" onclick="decrementSeries('${seriesCountId}')">-</button>
-                            </div>
+                        <div class="series-row">
+                            <span class="series-label">Series realizadas:</span>
+                            <span class="counter" id="${seriesCountId}">0</span>
+                            <br>
+                            <button class="btn-small" onclick="incrementSeries('${seriesCountId}')">+</button>
+                            <button class="btn-small" onclick="decrementSeries('${seriesCountId}')">-</button>
                         </div>
                     `;
+                    
+                    fragment.appendChild(exerciseDiv);
                 });
+                
+                container.appendChild(fragment); 
+            }
+            document.getElementById("summaryTableContainer").innerHTML = '';
+        }
+
+        function createSummaryTable() {
+            const container = document.getElementById("summaryTableContainer");
+            const day = document.getElementById("daySelect").value;
+            const chosenDate = document.getElementById("calendarDateSelect").value;
+            
+            if (!day || currentSeriesCounterIds.length === 0) {
+                container.innerHTML = "<p>Por favor, selecciona una rutina para ver los ejercicios.</p>";
+                return;
+            }
+            if (!chosenDate) {
+                container.innerHTML = "<p style='color:var(--alert)'>Por favor, selecciona una fecha válida en el calendario.</p>";
+                return;
+            }
+            
+            let tableHTML = `
+                <h2>Resumen de Series (Rutina: ${day})</h2>
+                <p><strong>Fecha de guardado asignada:</strong> ${chosenDate}</p>
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Ejercicio</th>
+                            <th>Series Realizadas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            currentSeriesCounterIds.forEach(item => {
+                const seriesElement = document.getElementById(item.id);
+                const seriesCount = seriesElement ? seriesElement.innerText : '0';
+                
+                tableHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>${seriesCount}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            container.innerHTML = tableHTML;
+            document.getElementById("btnSaveFirebase").style.display = "block";
+        }
+
+        // --- ENVIAR DATOS CON FECHA PERSONALIZADA ELECTA ---
+        async function saveTrainingToFirebase() {
+            const day = document.getElementById("daySelect").value;
+            const chosenDate = document.getElementById("calendarDateSelect").value;
+            if(!day || !chosenDate) return;
+
+            // Construir una estampa ISO artificial basada puramente en el día electo por ti
+            // Esto asegura que el archivo "Calendario.html" procese correctamente la fecha asignada.
+            const horaActualStr = new Date().toISOString().split('T')[1]; // Conserva la hora exacta actual
+            const fechaHoraISO = `${chosenDate}T${horaActualStr}`; 
+
+            let entrenamientoData = {
+                diaPlanificado: day,
+                ejercicios: []
+            };
+
+            currentSeriesCounterIds.forEach(item => {
+                const seriesElement = document.getElementById(item.id);
+                const seriesCount = seriesElement ? parseInt(seriesElement.innerText) : 0;
+                entrenamientoData.ejercicios.push({
+                    nombreEjercicio: item.name,
+                    seriesDone: seriesCount
+                });
+            });
+
+            try {
+                await addDoc(collection(db, "scores"), {
+                    nombre: "Rutina_" + day, 
+                    puntuacion: 999,          
+                    tiempo: 0,               
+                    fechaHoraISO, // Forzamos la fecha elegida por ti en el input
+                    fechaHoraLocal: chosenDate,
+                    detallesRutina: entrenamientoData 
+                });
+
+                alert(`¡Entrenamiento guardado con éxito para la fecha: ${chosenDate}!`);
+                document.getElementById("btnSaveFirebase").style.display = "none";
+            } catch (e) {
+                console.error("Error guardando el entrenamiento: ", e);
+                alert("Error al intentar guardar en Firebase.");
             }
         }
+
+        document.getElementById("daySelect").addEventListener("change", showExercises);
+        document.getElementById("btnSummary").addEventListener("click", createSummaryTable);
+        document.getElementById("btnSaveFirebase").addEventListener("click", saveTrainingToFirebase);
     </script>
 </body>
 </html>
